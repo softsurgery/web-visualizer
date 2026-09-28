@@ -14,8 +14,16 @@ export function IframeCard({ url, name, onDelete }: IframeCardProps) {
     description: `Are you sure you want to remove "${name}" from this group?`,
     children: (isOpen, close) => (
       <div className="flex justify-end gap-2 mt-4">
-        <Button variant="outline" onClick={close}>Cancel</Button>
-        <Button variant="destructive" onClick={() => { onDelete(); close(); }}>
+        <Button variant="outline" onClick={close}>
+          Cancel
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={() => {
+            onDelete();
+            close();
+          }}
+        >
           Delete
         </Button>
       </div>
@@ -28,7 +36,9 @@ export function IframeCard({ url, name, onDelete }: IframeCardProps) {
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-2 truncate max-w-[80%]">
           <span className="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
-          <span className="font-semibold text-foreground truncate">{name}</span>
+          <span className="text-xs font-semibold text-foreground truncate">
+            {name}
+          </span>
           <span className="text-muted-foreground mx-1">-</span>
           <a
             href={url}

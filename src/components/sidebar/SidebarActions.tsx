@@ -50,18 +50,19 @@ export function SidebarActions({
     <div className="p-4 border-b border-border bg-background">
       {SheetFragment}
       <div className="flex gap-2 mb-4">
-        <button
+        <Button
+          variant="outline"
           onClick={onExport}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium border border-border rounded hover:bg-muted transition text-foreground"
+          className="flex-1 flex items-center justify-center gap-2"
         >
           <Download size={16} /> Export
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => fileInputRef.current?.click()}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium bg-foreground text-background rounded hover:opacity-90 transition"
+          className="flex-1 flex items-center justify-center gap-2"
         >
           <Upload size={16} /> Import
-        </button>
+        </Button>
         <input
           type="file"
           accept=".json"

@@ -28,12 +28,13 @@ export function GroupItem({ group, isActive, onSelect, onDelete }: GroupItemProp
   return (
     <li>
       {DialogFragment}
-      <button
+      <Button
+        variant="ghost"
         onClick={() => onSelect(group.id)}
-        className={`w-full text-left px-4 py-3 flex justify-between items-center group transition ${
+        className={`w-full justify-between h-auto px-4 py-3 rounded-none group transition ${
           isActive
             ? 'bg-muted font-medium text-foreground'
-            : 'hover:bg-muted/50 text-muted-foreground'
+            : 'text-muted-foreground'
         }`}
       >
         <span className="truncate pr-4">{group.name}</span>
@@ -44,7 +45,7 @@ export function GroupItem({ group, isActive, onSelect, onDelete }: GroupItemProp
         >
           <Trash2 size={16} />
         </span>
-      </button>
+      </Button>
     </li>
   );
 }

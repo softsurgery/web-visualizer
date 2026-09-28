@@ -4,6 +4,7 @@ import { MainHeader } from "@/components/main/MainHeader";
 import { IframeCard } from "@/components/main/IframeCard";
 import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type LayoutType = "lg" | "md" | "sm" | "list";
 
@@ -49,34 +50,38 @@ export function MainView({
         ) : (
           <>
             <div className="flex justify-end mb-4 gap-1">
-              <button
+              <Button
+                variant={layout === "sm" ? "default" : "outline"}
+                size="icon"
                 onClick={() => setLayout("sm")}
-                className={`p-2 rounded ${layout === "sm" ? "bg-foreground text-background" : "bg-background text-foreground border border-border hover:bg-muted"}`}
                 title="Small Grid"
               >
                 <Grid3X3 size={18} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={layout === "md" ? "default" : "outline"}
+                size="icon"
                 onClick={() => setLayout("md")}
-                className={`p-2 rounded ${layout === "md" ? "bg-foreground text-background" : "bg-background text-foreground border border-border hover:bg-muted"}`}
                 title="Medium Grid"
               >
                 <Grid2X2 size={18} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={layout === "lg" ? "default" : "outline"}
+                size="icon"
                 onClick={() => setLayout("lg")}
-                className={`p-2 rounded ${layout === "lg" ? "bg-foreground text-background" : "bg-background text-foreground border border-border hover:bg-muted"}`}
                 title="Large Grid"
               >
                 <LayoutGrid size={18} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={layout === "list" ? "default" : "outline"}
+                size="icon"
                 onClick={() => setLayout("list")}
-                className={`p-2 rounded ${layout === "list" ? "bg-foreground text-background" : "bg-background text-foreground border border-border hover:bg-muted"}`}
                 title="List View"
               >
                 <List size={18} />
-              </button>
+              </Button>
             </div>
             <div className={getGridClass()}>
               {activeGroup.urls.map((entry, index) => (
