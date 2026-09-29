@@ -3,13 +3,15 @@ import { Plus } from "lucide-react";
 import type { Group } from "@/types";
 import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
+import { cn } from "cn";
 
 interface MainHeaderProps {
+  className?: string;
   activeGroup: Group;
   onAddUrl: (url: string, name: string) => void;
 }
 
-export function MainHeader({ activeGroup, onAddUrl }: MainHeaderProps) {
+export function MainHeader({ className, activeGroup, onAddUrl }: MainHeaderProps) {
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
 
@@ -61,7 +63,7 @@ export function MainHeader({ activeGroup, onAddUrl }: MainHeaderProps) {
   }
 
   return (
-    <header className="px-6 py-4 border-b border-border flex items-center justify-between md:pl-6 pl-16 bg-background">
+    <header className={cn("px-6 py-4 border-b border-border flex items-center justify-between md:pl-6 pl-16 bg-background", className)}>
       {SheetFragment}
       <div>
         <h2 className="text-2xl font-bold text-foreground">

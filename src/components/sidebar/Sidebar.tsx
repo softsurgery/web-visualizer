@@ -4,8 +4,10 @@ import { GroupItem } from "@/components/sidebar/GroupItem";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import { StorageService } from "@/services/StorageService";
+import { cn } from "cn";
 
 interface SidebarProps {
+  className?: string;
   groups: Group[];
   activeGroupId: string | null;
   isSidebarOpen: boolean;
@@ -17,6 +19,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({
+  className,
   groups,
   activeGroupId,
   isSidebarOpen,
@@ -40,9 +43,11 @@ export function Sidebar({
 
   return (
     <aside
-      className={`${
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } absolute md:relative z-40 w-72 h-full bg-muted/30 border-r border-border flex flex-col transition-transform duration-300 ease-in-out`}
+      className={cn(
+        "absolute md:relative z-40 w-72 h-full bg-muted/30 border-r border-border flex flex-col transition-transform duration-300 ease-in-out",
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+        className
+      )}
     >
       <SidebarHeader onClose={() => setIsSidebarOpen(false)} />
 

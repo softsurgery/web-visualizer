@@ -3,14 +3,21 @@ import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { DESKTOP_WIDTH } from "./constants";
+import { cn } from "cn";
 
 interface IframeCardProps {
+  className?: string;
   url: string;
   name: string;
   onDelete: () => void;
 }
 
-export function IframeCard({ url, name, onDelete }: IframeCardProps) {
+export function IframeCard({
+  className,
+  url,
+  name,
+  onDelete,
+}: IframeCardProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale, setScale] = React.useState(1);
   const [useProxy, setUseProxy] = React.useState(false);
@@ -69,20 +76,29 @@ export function IframeCard({ url, name, onDelete }: IframeCardProps) {
   });
 
   return (
-    <div className="flex flex-col bg-background rounded-lg border border-border shadow-sm overflow-hidden h-full relative">
+    <div
+      className={cn(
+        "flex flex-col bg-background rounded-lg border border-border shadow-sm overflow-hidden h-full relative",
+        className,
+      )}
+    >
       {DialogFragment}
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-10">
         <div className="flex items-center gap-2 truncate max-w-[80%]">
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
-              isChecking ? "bg-yellow-500" : useProxy ? "bg-orange-500" : "bg-green-500"
+              isChecking
+                ? "bg-yellow-500"
+                : useProxy
+                  ? "bg-orange-500"
+                  : "bg-green-500"
             }`}
             title={
               isChecking
                 ? "Checking frameability..."
                 : useProxy
-                ? "Proxied (Bypassing X-Frame-Options)"
-                : "Direct Connection"
+                  ? "Proxied (Bypassing X-Frame-Options)"
+                  : "Direct Connection"
             }
           ></span>
           <span className="text-xs font-semibold text-foreground truncate">

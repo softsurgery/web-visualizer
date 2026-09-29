@@ -2,14 +2,17 @@ import React from "react";
 import { Plus, Download, Upload } from "lucide-react";
 import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
+import { cn } from "cn";
 
 interface SidebarActionsProps {
+  className?: string;
   onAddGroup: (name: string) => void;
   onExport: () => void;
   onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function SidebarActions({
+  className,
   onAddGroup,
   onExport,
   onImport,
@@ -47,7 +50,7 @@ export function SidebarActions({
   }
 
   return (
-    <div className="p-4 border-b border-border bg-background">
+    <div className={cn("p-4 border-b border-border bg-background", className)}>
       {SheetFragment}
       <div className="flex gap-2 mb-4">
         <Button

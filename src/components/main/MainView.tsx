@@ -5,16 +5,19 @@ import { IframeCard } from "@/components/main/IframeCard";
 import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "cn";
 
 type LayoutType = "lg" | "md" | "sm" | "list";
 
 interface MainViewProps {
+  className?: string;
   activeGroup?: Group;
   onAddUrl: (url: string, name: string) => void;
   onDeleteUrl: (index: number) => void;
 }
 
 export function MainView({
+  className,
   activeGroup,
   onAddUrl,
   onDeleteUrl,
@@ -41,7 +44,7 @@ export function MainView({
   };
 
   return (
-    <>
+    <div className={cn("flex flex-col h-full", className)}>
       <MainHeader activeGroup={activeGroup} onAddUrl={onAddUrl} />
 
       <div className="flex-1 p-6 overflow-y-auto bg-muted/10 flex flex-col">
@@ -97,6 +100,6 @@ export function MainView({
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }
