@@ -1,5 +1,5 @@
 import React from "react";
-import type { Group } from "@/types";
+import type { Group, LayoutType } from "@/types";
 import { MainHeader } from "@/components/main/MainHeader";
 import { IframeCard } from "@/components/main/IframeCard";
 import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
@@ -7,14 +7,13 @@ import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 
-type LayoutType = "lg" | "md" | "sm" | "list";
-
 interface MainViewProps {
   className?: string;
   activeGroup?: Group;
   onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void;
   onEditUrl: (index: number, url: string, name: string, pointToCenter?: boolean) => void;
   onDeleteUrl: (index: number) => void;
+  onChangeLayout?: (id: string, layout: LayoutType) => void;
 }
 
 export function MainView({
@@ -23,8 +22,24 @@ export function MainView({
   onAddUrl,
   onEditUrl,
   onDeleteUrl,
+  onChangeLayout,
 }: MainViewProps) {
   const [layout, setLayout] = React.useState<LayoutType>("md");
+
+  React.useEffect(() => {
+    if (activeGroup?.layout) {
+      setLayout(activeGroup.layout);
+    } else {
+      setLayout("md"); // default
+    }
+  }, [activeGroup?.id, activeGroup?.layout]);
+
+  const handleSetLayout = (newLayout: LayoutType) => {
+    setLayout(newLayout);
+    if (activeGroup && onChangeLayout) {
+      onChangeLayout(activeGroup.id, newLayout);
+    }
+  };
 
   if (!activeGroup) {
     return <EmptyGroupState />;
@@ -58,7 +73,7 @@ export function MainView({
               <Button
                 variant={layout === "sm" ? "default" : "outline"}
                 size="icon"
-                onClick={() => setLayout("sm")}
+                onClick={() => handleSetLayout("sm")}
                 title="Small Grid"
               >
                 <Grid3X3 size={18} />
@@ -66,7 +81,7 @@ export function MainView({
               <Button
                 variant={layout === "md" ? "default" : "outline"}
                 size="icon"
-                onClick={() => setLayout("md")}
+                onClick={() => handleSetLayout("md")}
                 title="Medium Grid"
               >
                 <Grid2X2 size={18} />
@@ -74,7 +89,7 @@ export function MainView({
               <Button
                 variant={layout === "lg" ? "default" : "outline"}
                 size="icon"
-                onClick={() => setLayout("lg")}
+                onClick={() => handleSetLayout("lg")}
                 title="Large Grid"
               >
                 <LayoutGrid size={18} />
@@ -82,7 +97,7 @@ export function MainView({
               <Button
                 variant={layout === "list" ? "default" : "outline"}
                 size="icon"
-                onClick={() => setLayout("list")}
+                onClick={() => handleSetLayout("list")}
                 title="List View"
               >
                 <List size={18} />

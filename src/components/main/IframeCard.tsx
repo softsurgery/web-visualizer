@@ -104,7 +104,7 @@ export function IframeCard({
     ),
   });
 
-  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog, closeDialog: closeEditDialog } = useDialog({
+  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog } = useDialog({
     title: "Edit URL",
     description: "Update the details for this URL.",
     children: (isOpen, close) => (

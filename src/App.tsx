@@ -6,7 +6,7 @@ import { MainView } from "@/components/main/MainView";
 import { SettingsView } from "@/components/main/SettingsView";
 import { WebsiteDetailsView } from "@/components/main/WebsiteDetailsView";
 import { StorageService } from "@/services/StorageService";
-import type { Group } from "@/types";
+import type { Group, LayoutType } from "@/types";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
@@ -93,6 +93,12 @@ function App() {
     }
   };
 
+  const changeGroupLayout = (id: string, layout: LayoutType) => {
+    setGroups((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, layout } : g))
+    );
+  };
+
   const activeGroup = groups.find((g) => g.id === activeGroupId);
 
   return (
@@ -113,6 +119,7 @@ function App() {
               onAddUrl={addUrl}
               onEditUrl={editUrl}
               onDeleteUrl={deleteUrl}
+              onChangeLayout={changeGroupLayout}
             />
           } />
           <Route path="/settings" element={
