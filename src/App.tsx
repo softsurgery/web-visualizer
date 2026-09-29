@@ -1,10 +1,12 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Menu } from "lucide-react";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { MainView } from "@/components/main/MainView";
+import { SettingsView } from "@/components/main/SettingsView";
 import { StorageService } from "@/services/StorageService";
 import type { Group } from "@/types";
+import { Routes, Route } from "react-router-dom";
 
 function App() {
   const [groups, setGroups] = React.useState<Group[]>(() =>
@@ -16,7 +18,6 @@ function App() {
       return loadedGroups.length > 0 ? loadedGroups[0].id : null;
     },
   );
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
   // Save to LocalStorage
   React.useEffect(() => {
@@ -78,36 +79,30 @@ function App() {
   const activeGroup = groups.find((g) => g.id === activeGroupId);
 
   return (
-    <div className="flex h-screen bg-background text-foreground font-sans overflow-hidden">
-      {/* Sidebar Overlay for mobile */}
-      {!isSidebarOpen && (
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="absolute top-4 left-4 z-50 p-2 bg-foreground text-background rounded-md shadow-md md:hidden hover:opacity-90 transition"
-        >
-          <Menu size={20} />
-        </button>
-      )}
-
+    <SidebarProvider>
       <Sidebar
         groups={groups}
         activeGroupId={activeGroupId}
-        isSidebarOpen={isSidebarOpen}
-        setIsSidebarOpen={setIsSidebarOpen}
         onAddGroup={addGroup}
         onDeleteGroup={deleteGroup}
         onSetActiveGroup={setActiveGroupId}
-        onImportGroups={handleImportGroups}
       />
 
-      <main className="flex-1 flex flex-col h-full bg-background relative">
-        <MainView
-          activeGroup={activeGroup}
-          onAddUrl={addUrl}
-          onDeleteUrl={deleteUrl}
-        />
-      </main>
-    </div>
+      <SidebarInset className="overflow-hidden">
+        <Routes>
+          <Route path="/" element={
+            <MainView
+              activeGroup={activeGroup}
+              onAddUrl={addUrl}
+              onDeleteUrl={deleteUrl}
+            />
+          } />
+          <Route path="/settings" element={
+            <SettingsView groups={groups} onImportGroups={handleImportGroups} />
+          } />
+        </Routes>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ThemeProvider } from '@/components/theme-provider'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { BrowserRouter } from 'react-router-dom'
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(err => {
@@ -13,7 +15,11 @@ if ('serviceWorker' in navigator) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <App />
+      <BrowserRouter>
+        <TooltipProvider>
+          <App />
+        </TooltipProvider>
+      </BrowserRouter>
     </ThemeProvider>
   </StrictMode>,
 )

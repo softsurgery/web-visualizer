@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import type { Group } from "@/types";
 import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "cn";
 
 interface MainHeaderProps {
@@ -11,7 +12,11 @@ interface MainHeaderProps {
   onAddUrl: (url: string, name: string) => void;
 }
 
-export function MainHeader({ className, activeGroup, onAddUrl }: MainHeaderProps) {
+export function MainHeader({
+  className,
+  activeGroup,
+  onAddUrl,
+}: MainHeaderProps) {
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
 
@@ -63,15 +68,23 @@ export function MainHeader({ className, activeGroup, onAddUrl }: MainHeaderProps
   }
 
   return (
-    <header className={cn("px-6 py-4 border-b border-border flex items-center justify-between md:pl-6 pl-16 bg-background", className)}>
+    <header
+      className={cn(
+        "px-6 py-4 border-b border-border flex items-center justify-between bg-background",
+        className,
+      )}
+    >
       {SheetFragment}
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">
-          {activeGroup.name}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {activeGroup.urls.length} URLs in this group
-        </p>
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-4 mr-2" />
+        <div>
+          <h2 className="text-md font-bold text-foreground">
+            {activeGroup.name}
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {activeGroup.urls.length} URLs in this group
+          </p>
+        </div>
       </div>
       <Button onClick={openSheet} className="flex items-center gap-2">
         <Plus size={18} /> <span className="hidden sm:inline">Add URL</span>

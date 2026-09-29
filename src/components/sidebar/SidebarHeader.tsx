@@ -1,28 +1,24 @@
-import { X } from 'lucide-react';
+import { GalleryVerticalEnd } from 'lucide-react';
 import { ModeToggle } from '@/components/mode-toggle';
-import { Button } from '@/components/ui/button';
 import { cn } from "cn";
 
 interface SidebarHeaderProps {
   className?: string;
-  onClose: () => void;
 }
 
-export function SidebarHeader({ className, onClose }: SidebarHeaderProps) {
+export function SidebarHeader({ className }: SidebarHeaderProps = {}) {
   return (
-    <div className={cn("p-4 border-b border-border flex justify-between items-center bg-background text-foreground", className)}>
-      <h1 className="font-bold text-xl tracking-tight">Visualizer</h1>
-      <div className="flex items-center gap-2">
-        <ModeToggle />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={onClose}
-        >
-          <X size={20} />
-        </Button>
+    <div className={cn("p-2 flex items-center justify-between", className)}>
+      <div className="flex items-center gap-2 px-2 py-1.5">
+        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+          <GalleryVerticalEnd className="size-4" />
+        </div>
+        <div className="flex flex-col gap-0.5 leading-none">
+          <span className="font-semibold text-sm">Visualizer Inc</span>
+          <span className="text-xs text-muted-foreground">Workspace</span>
+        </div>
       </div>
+      <ModeToggle />
     </div>
   );
 }

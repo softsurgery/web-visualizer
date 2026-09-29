@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Download, Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
@@ -7,18 +7,13 @@ import { cn } from "cn";
 interface SidebarActionsProps {
   className?: string;
   onAddGroup: (name: string) => void;
-  onExport: () => void;
-  onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function SidebarActions({
   className,
   onAddGroup,
-  onExport,
-  onImport,
 }: SidebarActionsProps) {
   const [newGroupName, setNewGroupName] = React.useState("");
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New Group",
@@ -50,30 +45,8 @@ export function SidebarActions({
   }
 
   return (
-    <div className={cn("p-4 border-b border-border bg-background", className)}>
+    <div className={cn("p-4 border-t border-border bg-background mt-auto", className)}>
       {SheetFragment}
-      <div className="flex gap-2 mb-4">
-        <Button
-          variant="outline"
-          onClick={onExport}
-          className="flex-1 flex items-center justify-center gap-2"
-        >
-          <Download size={16} /> Export
-        </Button>
-        <Button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex-1 flex items-center justify-center gap-2"
-        >
-          <Upload size={16} /> Import
-        </Button>
-        <input
-          type="file"
-          accept=".json"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={onImport}
-        />
-      </div>
 
       <Button onClick={openSheet} className="w-full flex items-center gap-2">
         <Plus size={18} /> Add Group
