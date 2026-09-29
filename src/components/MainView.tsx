@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Trash2, ExternalLink, Menu } from "lucide-react";
+import { Plus, X, ExternalLink, Menu } from "lucide-react";
 import type { Group } from "../types";
 
 interface MainViewProps {
@@ -80,7 +80,7 @@ export function MainView({
               >
                 <div className="px-4 py-2 bg-gray-100 border-b border-gray-200 flex justify-between items-center">
                   <div className="flex items-center gap-2 truncate max-w-[80%]">
-                    <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>
+                    <span className="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
                     <a
                       href={url}
                       target="_blank"
@@ -95,7 +95,7 @@ export function MainView({
                     className="text-gray-400 hover:text-red-500 p-1.5 rounded hover:bg-white transition"
                     title="Remove URL"
                   >
-                    <Trash2 size={16} />
+                    <X size={16} />
                   </button>
                 </div>
                 <div className="flex-1 relative bg-gray-50">

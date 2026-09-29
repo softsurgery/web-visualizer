@@ -1,4 +1,4 @@
-import { Trash2, Edit2 } from "lucide-react";
+import { X, Edit2 } from "lucide-react";
 import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
 import React from "react";
@@ -37,7 +37,9 @@ export function IframeCard({
 
   const [editUrl, setEditUrl] = React.useState(url);
   const [editName, setEditName] = React.useState(name);
-  const [editPointToCenter, setEditPointToCenter] = React.useState(pointToCenter || false);
+  const [editPointToCenter, setEditPointToCenter] = React.useState(
+    pointToCenter || false,
+  );
 
   React.useEffect(() => {
     setEditUrl(url);
@@ -73,13 +75,14 @@ export function IframeCard({
     });
 
     observer.observe(container);
-    
+
     if (pointToCenter && !isChecking) {
       setTimeout(() => {
-        container.scrollTop = container.scrollHeight / 2 - container.clientHeight / 2;
+        container.scrollTop =
+          container.scrollHeight / 2 - container.clientHeight / 2;
       }, 100);
     }
-    
+
     return () => observer.disconnect();
   }, [isChecking, pointToCenter]);
 
@@ -104,51 +107,52 @@ export function IframeCard({
     ),
   });
 
-  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog } = useDialog({
-    title: "Edit URL",
-    description: "Update the details for this URL.",
-    children: (isOpen, close) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onEdit(editUrl, editName, editPointToCenter);
-          close();
-        }}
-        className="flex flex-col gap-4 mt-4"
-      >
-        <input
-          type="text"
-          placeholder="Name"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-          autoFocus
-        />
-        <input
-          type="text"
-          placeholder="https://example.com"
-          value={editUrl}
-          onChange={(e) => setEditUrl(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-        />
-        <label className="flex items-center gap-2 text-sm text-foreground">
+  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog } =
+    useDialog({
+      title: "Edit URL",
+      description: "Update the details for this URL.",
+      children: (isOpen, close) => (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onEdit(editUrl, editName, editPointToCenter);
+            close();
+          }}
+          className="flex flex-col gap-4 mt-4"
+        >
           <input
-            type="checkbox"
-            checked={editPointToCenter}
-            onChange={(e) => setEditPointToCenter(e.target.checked)}
-            className="rounded border-border text-foreground focus:ring-foreground"
+            type="text"
+            placeholder="Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+            autoFocus
           />
-          Point to Center
-        </label>
-        <div className="flex justify-end gap-2 mt-4">
-          <Button type="button" variant="outline" onClick={close}>
-            Cancel
-          </Button>
-          <Button type="submit">Save</Button>
-        </div>
-      </form>
-    ),
-  });
+          <input
+            type="text"
+            placeholder="https://example.com"
+            value={editUrl}
+            onChange={(e) => setEditUrl(e.target.value)}
+            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+          />
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={editPointToCenter}
+              onChange={(e) => setEditPointToCenter(e.target.checked)}
+              className="rounded border-border text-foreground focus:ring-foreground"
+            />
+            Point to Center
+          </label>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button type="button" variant="outline" onClick={close}>
+              Cancel
+            </Button>
+            <Button type="submit">Save</Button>
+          </div>
+        </form>
+      ),
+    });
 
   const handleCardClick = () => {
     const data: WebsiteData = {
@@ -222,7 +226,7 @@ export function IframeCard({
             className="text-muted-foreground hover:text-red-500 h-8 w-8 transition"
             title="Remove URL"
           >
-            <Trash2 size={16} />
+            <X size={16} />
           </Button>
         </div>
       </div>
@@ -231,14 +235,14 @@ export function IframeCard({
         ref={containerRef}
       >
         {!isChecking && (
-          <div 
+          <div
             className="relative w-full cursor-pointer"
             style={{ height: 4000 * scale }}
             onClick={handleCardClick}
           >
             {/* Invisible overlay to ensure clicks are caught regardless of iframe pointer-events behavior */}
             <div className="absolute inset-0 z-10" />
-            
+
             <iframe
               src={useProxy ? `/__proxy?url=${encodeURIComponent(url)}` : url}
               className="absolute top-0 left-0 border-0 pointer-events-none"

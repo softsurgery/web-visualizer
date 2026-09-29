@@ -1,9 +1,13 @@
-import React from 'react';
-import { Trash2, LayoutGrid } from 'lucide-react';
-import type { Group } from '@/types';
-import { useDialog } from '@/hooks/useDialog';
-import { Button } from '@/components/ui/button';
-import { SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from "@/components/ui/sidebar";
+import React from "react";
+import { X, LayoutGrid } from "lucide-react";
+import type { Group } from "@/types";
+import { useDialog } from "@/hooks/useDialog";
+import { Button } from "@/components/ui/button";
+import {
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuAction,
+} from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 
 interface GroupItemProps {
@@ -14,14 +18,28 @@ interface GroupItemProps {
   onDelete: (id: string, e: React.MouseEvent) => void;
 }
 
-export function GroupItem({ className, group, isActive, onSelect, onDelete }: GroupItemProps) {
+export function GroupItem({
+  className,
+  group,
+  isActive,
+  onSelect,
+  onDelete,
+}: GroupItemProps) {
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete Group",
     description: `Are you sure you want to delete "${group.name}"? This action cannot be undone.`,
     children: (_isOpen, close) => (
       <div className="flex justify-end gap-2 mt-4">
-        <Button variant="outline" onClick={close}>Cancel</Button>
-        <Button variant="destructive" onClick={(e) => { onDelete(group.id, e as any); close(); }}>
+        <Button variant="outline" onClick={close}>
+          Cancel
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={(e) => {
+            onDelete(group.id, e as any);
+            close();
+          }}
+        >
           Delete
         </Button>
       </div>
@@ -47,11 +65,14 @@ export function GroupItem({ className, group, isActive, onSelect, onDelete }: Gr
         </div>
       </SidebarMenuButton>
       <SidebarMenuAction
-        onClick={(e) => { e.stopPropagation(); openDialog(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          openDialog();
+        }}
         className="text-muted-foreground hover:text-red-500"
         title="Delete group"
       >
-        <Trash2 size={16} />
+        <X size={16} />
       </SidebarMenuAction>
     </SidebarMenuItem>
   );

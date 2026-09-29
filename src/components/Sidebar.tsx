@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Trash2, Download, Upload, X } from "lucide-react";
+import { Plus, Download, Upload, X } from "lucide-react";
 import type { Group } from "../types";
 
 interface SidebarProps {
@@ -147,7 +147,7 @@ export function Sidebar({
                     className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition p-1"
                     title="Delete group"
                   >
-                    <Trash2 size={16} />
+                    <X size={16} />
                   </span>
                 </button>
               </li>
