@@ -12,7 +12,8 @@ type LayoutType = "lg" | "md" | "sm" | "list";
 interface MainViewProps {
   className?: string;
   activeGroup?: Group;
-  onAddUrl: (url: string, name: string) => void;
+  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void;
+  onEditUrl: (index: number, url: string, name: string, pointToCenter?: boolean) => void;
   onDeleteUrl: (index: number) => void;
 }
 
@@ -20,6 +21,7 @@ export function MainView({
   className,
   activeGroup,
   onAddUrl,
+  onEditUrl,
   onDeleteUrl,
 }: MainViewProps) {
   const [layout, setLayout] = React.useState<LayoutType>("md");
@@ -92,7 +94,9 @@ export function MainView({
                   <IframeCard
                     url={entry.url}
                     name={entry.name}
+                    pointToCenter={entry.pointToCenter}
                     onDelete={() => onDeleteUrl(index)}
+                    onEdit={(url, name, pointToCenter) => onEditUrl(index, url, name, pointToCenter)}
                   />
                 </div>
               ))}

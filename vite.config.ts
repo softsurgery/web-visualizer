@@ -122,6 +122,50 @@ const iframeProxyPlugin = (): Plugin => {
           res.end(error.message);
         }
       });
+
+      server.middlewares.use("/__metadata", async (req, res) => {
+        try {
+          const urlStr = req.url || "";
+          const urlParam = new URL(urlStr, `http://${req.headers.host}`).searchParams.get("url");
+          if (!urlParam) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: "Missing url parameter" }));
+            return;
+          }
+          const targetUrl = new URL(urlParam);
+          const response = await fetch(targetUrl, {
+            method: "GET",
+            headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" },
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const text = await response.text();
+          
+          const titleMatch = text.match(/<title[^>]*>([^<]+)<\/title>/i);
+          const descMatch = text.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i) || 
+                            text.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["'][^>]*>/i);
+          const generatorMatch = text.match(/<meta[^>]*name=["']generator["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+                                 text.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']generator["'][^>]*>/i);
+                                 
+          const metadata = {
+            title: titleMatch ? titleMatch[1].trim() : "Unknown Title",
+            description: descMatch ? descMatch[1].trim() : "No description available",
+            generator: generatorMatch ? generatorMatch[1].trim() : "Unknown Generator",
+            server: response.headers.get("server") || "Unknown Server",
+          };
+          
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify(metadata));
+        } catch (error: any) {
+          console.error("Metadata error:", error);
+          res.statusCode = 500;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ error: error.message }));
+        }
+      });
     },
   };
 };

@@ -9,7 +9,7 @@ import { cn } from "cn";
 interface MainHeaderProps {
   className?: string;
   activeGroup: Group;
-  onAddUrl: (url: string, name: string) => void;
+  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void;
 }
 
 export function MainHeader({
@@ -19,6 +19,7 @@ export function MainHeader({
 }: MainHeaderProps) {
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
+  const [pointToCenter, setPointToCenter] = React.useState(false);
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New URL",
@@ -41,6 +42,15 @@ export function MainHeader({
           onChange={(e) => setNewUrl(e.target.value)}
           className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
         />
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            checked={pointToCenter}
+            onChange={(e) => setPointToCenter(e.target.checked)}
+            className="rounded border-border text-foreground focus:ring-foreground"
+          />
+          Point to Center (Scroll vertically to center of iframe)
+        </label>
         <Button
           type="submit"
           disabled={!newUrl.trim() || !newName.trim()}
@@ -61,9 +71,10 @@ export function MainHeader({
       urlToAdd = "https://" + urlToAdd;
     }
 
-    onAddUrl(urlToAdd, newName.trim());
+    onAddUrl(urlToAdd, newName.trim(), pointToCenter);
     setNewUrl("");
     setNewName("");
+    setPointToCenter(false);
     closeSheet();
   }
 

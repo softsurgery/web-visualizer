@@ -1,7 +1,8 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit2 } from "lucide-react";
 import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { DESKTOP_WIDTH } from "./constants";
 import { cn } from "cn";
 
@@ -9,19 +10,40 @@ interface IframeCardProps {
   className?: string;
   url: string;
   name: string;
+  pointToCenter?: boolean;
   onDelete: () => void;
+  onEdit: (url: string, name: string, pointToCenter: boolean) => void;
+}
+
+export interface WebsiteData {
+  url: string;
+  name: string;
+  isProxied: boolean;
 }
 
 export function IframeCard({
   className,
   url,
   name,
+  pointToCenter,
   onDelete,
+  onEdit,
 }: IframeCardProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [scale, setScale] = React.useState(1);
   const [useProxy, setUseProxy] = React.useState(false);
   const [isChecking, setIsChecking] = React.useState(true);
+
+  const [editUrl, setEditUrl] = React.useState(url);
+  const [editName, setEditName] = React.useState(name);
+  const [editPointToCenter, setEditPointToCenter] = React.useState(pointToCenter || false);
+
+  React.useEffect(() => {
+    setEditUrl(url);
+    setEditName(name);
+    setEditPointToCenter(pointToCenter || false);
+  }, [url, name, pointToCenter]);
 
   React.useEffect(() => {
     setIsChecking(true);
@@ -51,10 +73,17 @@ export function IframeCard({
     });
 
     observer.observe(container);
+    
+    if (pointToCenter && !isChecking) {
+      setTimeout(() => {
+        container.scrollTop = container.scrollHeight / 2 - container.clientHeight / 2;
+      }, 100);
+    }
+    
     return () => observer.disconnect();
-  }, [isChecking]);
+  }, [isChecking, pointToCenter]);
 
-  const { DialogFragment, openDialog, closeDialog } = useDialog({
+  const { DialogFragment, openDialog } = useDialog({
     title: "Delete URL",
     description: `Are you sure you want to remove "${name}" from this group?`,
     children: (isOpen, close) => (
@@ -75,6 +104,61 @@ export function IframeCard({
     ),
   });
 
+  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog, closeDialog: closeEditDialog } = useDialog({
+    title: "Edit URL",
+    description: "Update the details for this URL.",
+    children: (isOpen, close) => (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onEdit(editUrl, editName, editPointToCenter);
+          close();
+        }}
+        className="flex flex-col gap-4 mt-4"
+      >
+        <input
+          type="text"
+          placeholder="Name"
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+          autoFocus
+        />
+        <input
+          type="text"
+          placeholder="https://example.com"
+          value={editUrl}
+          onChange={(e) => setEditUrl(e.target.value)}
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+        />
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            checked={editPointToCenter}
+            onChange={(e) => setEditPointToCenter(e.target.checked)}
+            className="rounded border-border text-foreground focus:ring-foreground"
+          />
+          Point to Center
+        </label>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button type="button" variant="outline" onClick={close}>
+            Cancel
+          </Button>
+          <Button type="submit">Save</Button>
+        </div>
+      </form>
+    ),
+  });
+
+  const handleCardClick = () => {
+    const data: WebsiteData = {
+      url,
+      name,
+      isProxied: useProxy,
+    };
+    navigate(`/details/${encodeURIComponent(url)}`, { state: data });
+  };
+
   return (
     <div
       className={cn(
@@ -83,7 +167,8 @@ export function IframeCard({
       )}
     >
       {DialogFragment}
-      <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-10">
+      {EditDialogFragment}
+      <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-20 relative">
         <div className="flex items-center gap-2 truncate max-w-[80%]">
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
@@ -114,35 +199,60 @@ export function IframeCard({
             {url}
           </a>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={openDialog}
-          className="text-muted-foreground hover:text-red-500 h-8 w-8 transition"
-          title="Remove URL"
-        >
-          <Trash2 size={16} />
-        </Button>
+        <div className="flex gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditDialog();
+            }}
+            className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
+            title="Edit URL"
+          >
+            <Edit2 size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              openDialog();
+            }}
+            className="text-muted-foreground hover:text-red-500 h-8 w-8 transition"
+            title="Remove URL"
+          >
+            <Trash2 size={16} />
+          </Button>
+        </div>
       </div>
       <div
-        className="flex-1 relative bg-muted/20 overflow-hidden"
+        className="flex-1 relative bg-muted/20 overflow-y-auto overflow-x-hidden no-scrollbar"
         ref={containerRef}
       >
         {!isChecking && (
-          <iframe
-            src={useProxy ? `/__proxy?url=${encodeURIComponent(url)}` : url}
-            className="absolute top-0 left-0 border-0"
-            style={{
-              // Add 24px to width to push the vertical scrollbar out of view
-              width: `${DESKTOP_WIDTH + 24}px`,
-              // Add 24px to height to push the horizontal scrollbar out of view (if any)
-              height: `calc(${100 / scale}% + 24px)`,
-              transform: `scale(${scale})`,
-              transformOrigin: "0 0",
-            }}
-            title={`Visualizer - ${name}`}
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          />
+          <div 
+            className="relative w-full cursor-pointer"
+            style={{ height: 4000 * scale }}
+            onClick={handleCardClick}
+          >
+            {/* Invisible overlay to ensure clicks are caught regardless of iframe pointer-events behavior */}
+            <div className="absolute inset-0 z-10" />
+            
+            <iframe
+              src={useProxy ? `/__proxy?url=${encodeURIComponent(url)}` : url}
+              className="absolute top-0 left-0 border-0 pointer-events-none"
+              style={{
+                width: `${DESKTOP_WIDTH}px`,
+                height: `4000px`,
+                transform: `scale(${scale})`,
+                transformOrigin: "0 0",
+              }}
+              title={`Visualizer - ${name}`}
+              scrolling="no"
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            />
+          </div>
         )}
         {isChecking && (
           <div className="absolute inset-0 flex items-center justify-center">

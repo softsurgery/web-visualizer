@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { MainView } from "@/components/main/MainView";
 import { SettingsView } from "@/components/main/SettingsView";
+import { WebsiteDetailsView } from "@/components/main/WebsiteDetailsView";
 import { StorageService } from "@/services/StorageService";
 import type { Group } from "@/types";
 import { Routes, Route } from "react-router-dom";
@@ -47,11 +48,27 @@ function App() {
     }
   };
 
-  const addUrl = (url: string, name: string) => {
+  const addUrl = (url: string, name: string, pointToCenter?: boolean) => {
     if (!activeGroupId) return;
     setGroups((prev) =>
       prev.map((g) =>
-        g.id === activeGroupId ? { ...g, urls: [...g.urls, { url, name }] } : g,
+        g.id === activeGroupId ? { ...g, urls: [...g.urls, { url, name, pointToCenter }] } : g,
+      ),
+    );
+  };
+
+  const editUrl = (indexToEdit: number, url: string, name: string, pointToCenter?: boolean) => {
+    if (!activeGroupId) return;
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === activeGroupId
+          ? {
+              ...g,
+              urls: g.urls.map((u, idx) =>
+                idx === indexToEdit ? { ...u, url, name, pointToCenter } : u
+              ),
+            }
+          : g,
       ),
     );
   };
@@ -94,12 +111,14 @@ function App() {
             <MainView
               activeGroup={activeGroup}
               onAddUrl={addUrl}
+              onEditUrl={editUrl}
               onDeleteUrl={deleteUrl}
             />
           } />
           <Route path="/settings" element={
             <SettingsView groups={groups} onImportGroups={handleImportGroups} />
           } />
+          <Route path="/details/:urlId" element={<WebsiteDetailsView />} />
         </Routes>
       </SidebarInset>
     </SidebarProvider>
