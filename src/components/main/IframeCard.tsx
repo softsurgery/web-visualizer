@@ -170,27 +170,23 @@ export function IframeCard({
       {DialogFragment}
       {EditDialogFragment}
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-20 relative">
-        <div className="flex items-center gap-2 truncate max-w-[80%]">
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 ${
-              isChecking
-                ? "bg-warning"
-                : useProxy
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                "w-2 h-2 rounded-full shrink-0",
+                isChecking
                   ? "bg-warning"
-                  : "bg-success"
-            }`}
-            title={
-              isChecking
-                ? "Checking frameability..."
-                : useProxy
-                  ? "Proxied (Bypassing X-Frame-Options)"
-                  : "Direct Connection"
-            }
-          ></span>
-          <span className="text-xs font-semibold text-foreground truncate">
-            {name}
-          </span>
-          <span className="text-muted-foreground mx-1">-</span>
+                  : useProxy
+                    ? "bg-warning"
+                    : "bg-success",
+              )}
+            ></div>
+            <span className="text-xs font-semibold text-foreground truncate">
+              {name}
+            </span>
+          </div>
+
           <a
             href={url}
             target="_blank"

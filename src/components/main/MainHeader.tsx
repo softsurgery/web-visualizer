@@ -55,14 +55,14 @@ export function MainHeader({
           placeholder="https://example.com"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
-          className="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
         />
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             checked={pointToCenter}
             onChange={(e) => setPointToCenter(e.target.checked)}
-            className="rounded border-border text-foreground focus:ring-foreground"
+            className="rounded text-foreground focus:ring-foreground"
           />
           Point to Center (Scroll vertically to center of iframe)
         </label>
@@ -102,7 +102,7 @@ export function MainHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 h-[var(--header-height,3.5rem)] shrink-0 px-4 md:px-6 border-b border-border flex items-center justify-between bg-background gap-4",
+        "sticky top-0 z-50 h-(--header-height,3.5rem) shrink-0 px-4 md:px-6 border-b border-border flex items-center justify-between bg-background gap-4",
         className,
       )}
     >
