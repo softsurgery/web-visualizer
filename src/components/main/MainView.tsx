@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useDnDGridService, SortableItem } from "@/hooks/useDnDGridService";
 
 interface MainViewProps {
   className?: string;
@@ -59,9 +62,25 @@ export function MainView({
     }
   };
 
+  const handleReorder = (newUrls: typeof activeGroup.urls) => {
+    if (activeGroup && visualizer.reorderUrls) {
+      visualizer.reorderUrls(activeGroup.id, newUrls);
+    }
+  };
+
+  const { sensors, handleDragEnd, itemIds } = useDnDGridService({
+    items: activeGroup?.urls || [],
+    getId: (item) => `${item.url}-${item.name}`,
+    onReorder: handleReorder,
+  });
+
   if (!activeGroup) {
     return <EmptyGroupState />;
   }
+
+  const stableUrls = [...activeGroup.urls].sort((a, b) => {
+    return `${a.url}-${a.name}`.localeCompare(`${b.url}-${b.name}`);
+  });
 
   const getGridClass = () => {
     switch (layout) {
@@ -118,19 +137,39 @@ export function MainView({
               <List size={18} />
             </Button>
           </div>
-          <div className={getGridClass()}>
-            {activeGroup.urls.map((entry, index) => (
-              <div key={`${entry.url}-${index}`} className={layout === "list" ? "h-[500px]" : "h-full"}>
-                <IframeCard
-                  url={entry.url}
-                  name={entry.name}
-                  pointToCenter={entry.pointToCenter}
-                  onDelete={() => onDeleteUrl(index)}
-                  onEdit={(url, name, pointToCenter) => onEditUrl(index, url, name, pointToCenter)}
-                />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={itemIds}
+              strategy={layout === "list" ? verticalListSortingStrategy : rectSortingStrategy}
+            >
+              <div className={getGridClass()}>
+                {stableUrls.map((entry) => {
+                  const id = `${entry.url}-${entry.name}`;
+                  const logicalIndex = activeGroup.urls.findIndex(u => `${u.url}-${u.name}` === id);
+                  if (logicalIndex === -1) return null;
+
+                  return (
+                  <SortableItem key={id} id={id} logicalIndex={logicalIndex} className={layout === "list" ? "h-125" : "h-full"}>
+                    {(dragHandleProps) => (
+                      <IframeCard
+                        url={entry.url}
+                        name={entry.name}
+                        pointToCenter={entry.pointToCenter}
+                        onDelete={() => onDeleteUrl(logicalIndex)}
+                        onEdit={(url, name, pointToCenter) => onEditUrl(logicalIndex, url, name, pointToCenter)}
+                        dragHandleProps={dragHandleProps}
+                      />
+                    )}
+                  </SortableItem>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         </>
       )}
     </div>

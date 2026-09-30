@@ -1,4 +1,4 @@
-import { X, Edit2 } from "lucide-react";
+import { X, Edit2, GripVertical } from "lucide-react";
 import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
 import React from "react";
@@ -13,6 +13,10 @@ interface IframeCardProps {
   pointToCenter?: boolean;
   onDelete: () => void;
   onEdit: (url: string, name: string, pointToCenter: boolean) => void;
+  dragHandleProps?: {
+    attributes: any;
+    listeners: any;
+  };
 }
 
 export interface WebsiteData {
@@ -28,6 +32,7 @@ export function IframeCard({
   pointToCenter,
   onDelete,
   onEdit,
+  dragHandleProps,
 }: IframeCardProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -196,7 +201,17 @@ export function IframeCard({
             {url}
           </a>
         </div>
-        <div className="flex gap-1 shrink-0">
+        <div className="flex gap-1 shrink-0 items-center">
+          {dragHandleProps && (
+            <div
+              {...dragHandleProps.attributes}
+              {...dragHandleProps.listeners}
+              className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
+              title="Drag to reorder"
+            >
+              <GripVertical size={16} />
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"

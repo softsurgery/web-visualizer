@@ -27,6 +27,7 @@ interface VisualizerStore {
   deleteUrl: (index: number) => void;
   importGroups: (groups: Group[]) => void;
   changeGroupLayout: (id: string, layout: LayoutType) => void;
+  reorderUrls: (groupId: string, newUrls: Group['urls']) => void;
   initialize: () => Promise<void>;
 }
 
@@ -136,6 +137,13 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
   changeGroupLayout: (id: string, layout: LayoutType) => {
     const { groups, isInitialized } = get();
     const newGroups = groups.map((g) => (g.id === id ? { ...g, layout } : g));
+    set({ groups: newGroups });
+    if (isInitialized) syncGroupsToDB(newGroups);
+  },
+
+  reorderUrls: (groupId: string, newUrls: Group['urls']) => {
+    const { groups, isInitialized } = get();
+    const newGroups = groups.map((g) => (g.id === groupId ? { ...g, urls: newUrls } : g));
     set({ groups: newGroups });
     if (isInitialized) syncGroupsToDB(newGroups);
   },
