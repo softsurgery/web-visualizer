@@ -146,13 +146,61 @@ export function WebsiteDetailsView() {
       <div className="p-6 border border-border rounded-lg bg-card text-card-foreground shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Preview</h3>
         <div className="relative bg-muted/20 border border-border rounded-md overflow-hidden" style={{ height: "600px" }}>
-          <iframe
-            src={isProxiedParam ? `/api/proxy?url=${encodeURIComponent(url)}` : url}
-            className="w-full h-full border-0"
-            title={`Preview - ${name}`}
-            scrolling="no"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          />
+          {isProxiedParam ? (
+            <div 
+              className="w-full h-full flex flex-col bg-white text-[#202124]"
+              style={{
+                fontFamily: '"Segoe UI", Tahoma, sans-serif',
+                paddingTop: "60px",
+                paddingLeft: "10%",
+                paddingRight: "10%",
+              }}
+            >
+              <div className="max-w-[600px] w-full">
+                <svg
+                  className="w-12 h-12 text-[#5f6368] mb-6"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-7-7zM6 20V4h6v6h6v10H6zm2.5-8.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM12 17c-2.33 0-4.32-1.45-5.12-3.5h1.67c.69 1.19 1.97 2 3.45 2s2.75-.81 3.45-2h1.67c-.8 2.05-2.79 3.5-5.12 3.5z" />
+                </svg>
+                <h1 className="text-2xl font-normal tracking-tight mb-4 text-[#202124]">
+                  This site can't be reached
+                </h1>
+                <p className="text-[15px] mb-6 text-[#202124]">
+                  <span className="font-bold">
+                    {(() => {
+                      try {
+                        return new URL(url).hostname;
+                      } catch (e) {
+                        return url;
+                      }
+                    })()}
+                  </span>{" "}
+                  refused to connect.
+                </p>
+                <div className="text-[14px] text-[#5f6368]">
+                  <p className="mb-4">Try:</p>
+                  <ul className="list-disc pl-10 space-y-2 mb-8">
+                    <li>Checking the connection</li>
+                    <li>Checking the proxy and the firewall</li>
+                    <li>Running Windows Network Diagnostics</li>
+                  </ul>
+                  <p className="text-[12px] text-[#5f6368] uppercase tracking-wider font-semibold">
+                    ERR_CONNECTION_REFUSED
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <iframe
+              src={url}
+              className="w-full h-full border-0"
+              title={`Preview - ${name}`}
+              scrolling="no"
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            />
+          )}
         </div>
       </div>
     </div>

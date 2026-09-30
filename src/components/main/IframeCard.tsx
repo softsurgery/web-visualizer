@@ -252,19 +252,71 @@ export function IframeCard({
             {/* Invisible overlay to ensure clicks are caught regardless of iframe pointer-events behavior */}
             <div className="absolute inset-0 z-10" />
 
-            <iframe
-              src={useProxy ? `/__proxy?url=${encodeURIComponent(url)}` : url}
-              className="absolute top-0 left-0 border-0 pointer-events-none"
-              style={{
-                width: `${DESKTOP_WIDTH}px`,
-                height: `4000px`,
-                transform: `scale(${scale})`,
-                transformOrigin: "0 0",
-              }}
-              title={`Visualizer - ${name}`}
-              scrolling="no"
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-            />
+            {useProxy ? (
+              <div 
+                className="absolute top-0 left-0 flex flex-col bg-white text-[#202124] pointer-events-none"
+                style={{
+                  width: `${DESKTOP_WIDTH}px`,
+                  height: `4000px`,
+                  transform: `scale(${scale})`,
+                  transformOrigin: "0 0",
+                  fontFamily: '"Segoe UI", Tahoma, sans-serif',
+                  paddingTop: "120px",
+                  paddingLeft: "15%",
+                  paddingRight: "15%",
+                }}
+              >
+                <div className="max-w-[600px] w-full">
+                  <svg
+                    className="w-12 h-12 text-[#5f6368] mb-6"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-7-7zM6 20V4h6v6h6v10H6zm2.5-8.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM12 17c-2.33 0-4.32-1.45-5.12-3.5h1.67c.69 1.19 1.97 2 3.45 2s2.75-.81 3.45-2h1.67c-.8 2.05-2.79 3.5-5.12 3.5z" />
+                  </svg>
+                  <h1 className="text-2xl font-normal tracking-tight mb-4 text-[#202124]">
+                    This site can't be reached
+                  </h1>
+                  <p className="text-[15px] mb-6 text-[#202124]">
+                    <span className="font-bold">
+                      {(() => {
+                        try {
+                          return new URL(url).hostname;
+                        } catch (e) {
+                          return url;
+                        }
+                      })()}
+                    </span>{" "}
+                    refused to connect.
+                  </p>
+                  <div className="text-[14px] text-[#5f6368]">
+                    <p className="mb-4">Try:</p>
+                    <ul className="list-disc pl-10 space-y-2 mb-8">
+                      <li>Checking the connection</li>
+                      <li>Checking the proxy and the firewall</li>
+                      <li>Running Windows Network Diagnostics</li>
+                    </ul>
+                    <p className="text-[12px] text-[#5f6368] uppercase tracking-wider font-semibold">
+                      ERR_CONNECTION_REFUSED
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <iframe
+                src={url}
+                className="absolute top-0 left-0 border-0 pointer-events-none"
+                style={{
+                  width: `${DESKTOP_WIDTH}px`,
+                  height: `4000px`,
+                  transform: `scale(${scale})`,
+                  transformOrigin: "0 0",
+                }}
+                title={`Visualizer - ${name}`}
+                scrolling="no"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
+            )}
           </div>
         )}
         {isChecking && (
