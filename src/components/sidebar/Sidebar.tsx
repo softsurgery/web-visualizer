@@ -103,8 +103,7 @@ export function Sidebar({
                     {renderedGroups.map((rg) => (
                       <SortableItem key={rg.id} id={rg.id}>
                         {({ attributes, listeners }) => (
-                          // @ts-ignore
-                          React.cloneElement(rg.child as React.ReactElement, {
+                          React.cloneElement(rg.child as React.ReactElement<any>, {
                             dragHandleProps: { attributes, listeners }
                           })
                         )}
