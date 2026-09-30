@@ -72,6 +72,7 @@ export function Sidebar({
             <SidebarGroupLabel>Groups</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarActions onAddGroup={onAddGroup} />
                 {groups.map((group) => (
                   <GroupItem
                     key={group.id}
@@ -96,7 +97,6 @@ export function Sidebar({
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SidebarActions onAddGroup={onAddGroup} />
       </SidebarFooter>
     </ShadcnSidebar>
   );

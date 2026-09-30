@@ -1,6 +1,7 @@
 import React from "react";
 import type { Group, LayoutType } from "@/types";
 import { IframeCard } from "@/components/main/IframeCard";
+import { AddUrlCard } from "@/components/main/AddUrlCard";
 import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,12 +24,14 @@ interface MainViewProps {
 export function MainView({
   className,
   activeGroup: activeGroupProp,
+  onAddUrl: onAddUrlProp,
   onEditUrl: onEditUrlProp,
   onDeleteUrl: onDeleteUrlProp,
   onChangeLayout: onChangeLayoutProp,
 }: MainViewProps = {}) {
   const visualizer = useVisualizer();
   const activeGroup = activeGroupProp ?? visualizer.activeGroup;
+  const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
   const onEditUrl = onEditUrlProp ?? visualizer.editUrl;
   const onDeleteUrl = onDeleteUrlProp ?? visualizer.deleteUrl;
   const onChangeLayout = onChangeLayoutProp ?? visualizer.changeGroupLayout;
@@ -167,6 +170,12 @@ export function MainView({
                   </SortableItem>
                   );
                 })}
+                <div className={layout === "list" ? "h-125" : "h-full"} style={{ order: 9999 }}>
+                  <AddUrlCard
+                    groupName={activeGroup.name}
+                    onAddUrl={(url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc)}
+                  />
+                </div>
               </div>
             </SortableContext>
           </DndContext>

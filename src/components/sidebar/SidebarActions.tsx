@@ -1,8 +1,8 @@
 import React from "react";
 import { Plus } from "lucide-react";
 import { useSheet } from "@/hooks/useSheet";
+import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { cn } from "cn";
 
 import { useRouter } from "next/navigation";
 
@@ -11,10 +11,7 @@ interface SidebarActionsProps {
   onAddGroup: (name: string) => void;
 }
 
-export function SidebarActions({
-  className,
-  onAddGroup,
-}: SidebarActionsProps) {
+export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
   const [newGroupName, setNewGroupName] = React.useState("");
   const router = useRouter();
 
@@ -32,7 +29,11 @@ export function SidebarActions({
           className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
           autoFocus
         />
-        <Button type="submit" disabled={!newGroupName.trim()} className="w-full">
+        <Button
+          type="submit"
+          disabled={!newGroupName.trim()}
+          className="w-full"
+        >
           Add Group
         </Button>
       </form>
@@ -50,12 +51,16 @@ export function SidebarActions({
   }
 
   return (
-    <div className={cn("p-4 border-t border-border bg-background mt-auto", className)}>
+    <>
       {SheetFragment}
-
-      <Button onClick={openSheet} className="w-full flex items-center gap-2">
-        <Plus size={18} /> Add Group
-      </Button>
-    </div>
+      <SidebarMenuItem className={className}>
+        <SidebarMenuButton onClick={openSheet}>
+          <div className="flex items-center gap-2 overflow-hidden text-muted-foreground hover:text-foreground">
+            <Plus className="size-4 shrink-0" />
+            <span className="truncate">Add Group</span>
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </>
   );
 }
