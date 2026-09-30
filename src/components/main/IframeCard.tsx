@@ -49,7 +49,7 @@ export function IframeCard({
 
   React.useEffect(() => {
     setIsChecking(true);
-    fetch(`/api/__check-frameable?url=${encodeURIComponent(url)}`)
+    fetch(`/api/check-frameable?url=${encodeURIComponent(url)}`)
       .then((res) => res.json())
       .then((data) => {
         setUseProxy(!data.frameable);

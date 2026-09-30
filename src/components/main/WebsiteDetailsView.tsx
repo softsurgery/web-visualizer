@@ -54,7 +54,7 @@ export function WebsiteDetailsView() {
     setIsScanning(true);
     setScanError(null);
     
-    fetch(`/api/__metadata?url=${encodeURIComponent(url)}`)
+    fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to scan website");
         return res.json();
@@ -142,7 +142,7 @@ export function WebsiteDetailsView() {
         <h3 className="text-lg font-semibold mb-4">Preview</h3>
         <div className="relative bg-muted/20 border border-border rounded-md overflow-hidden" style={{ height: "600px" }}>
           <iframe
-            src={isProxiedParam ? `/api/__proxy?url=${encodeURIComponent(url)}` : url}
+            src={isProxiedParam ? `/api/proxy?url=${encodeURIComponent(url)}` : url}
             className="w-full h-full border-0"
             title={`Preview - ${name}`}
             scrolling="no"
