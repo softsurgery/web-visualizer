@@ -17,28 +17,37 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
+import { useVisualizer } from "@/contexts";
 
 interface SidebarProps {
   className?: string;
-  groups: Group[];
-  activeGroupId: string | null;
-  onAddGroup: (name: string) => void;
-  onDeleteGroup: (id: string, e: React.MouseEvent) => void;
-  onSetActiveGroup: (id: string) => void;
+  variant?: "sidebar" | "floating" | "inset";
+  groups?: Group[];
+  activeGroupId?: string | null;
+  onAddGroup?: (name: string) => void;
+  onDeleteGroup?: (id: string, e: React.MouseEvent) => void;
+  onSetActiveGroup?: (id: string) => void;
 }
 
 export function Sidebar({
   className,
-  groups,
-  activeGroupId,
-  onAddGroup,
-  onDeleteGroup,
-  onSetActiveGroup,
-}: SidebarProps) {
+  variant = "inset",
+  groups: groupsProp,
+  activeGroupId: activeGroupIdProp,
+  onAddGroup: onAddGroupProp,
+  onDeleteGroup: onDeleteGroupProp,
+  onSetActiveGroup: onSetActiveGroupProp,
+}: SidebarProps = {}) {
+  const visualizer = useVisualizer();
+  const groups = groupsProp ?? visualizer.groups;
+  const activeGroupId = activeGroupIdProp ?? visualizer.activeGroupId;
+  const onAddGroup = onAddGroupProp ?? visualizer.addGroup;
+  const onDeleteGroup = onDeleteGroupProp ?? visualizer.deleteGroup;
+  const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
   const location = useLocation();
 
   return (
-    <ShadcnSidebar variant="inset" className={className}>
+    <ShadcnSidebar variant={variant} className={className}>
       <ShadcnSidebarHeader>
         <SidebarHeader />
       </ShadcnSidebarHeader>

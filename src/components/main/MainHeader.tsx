@@ -1,30 +1,44 @@
 import React from "react";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import type { Group } from "@/types";
 import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { cn } from "cn";
+import { useVisualizer, useBreadcrumb } from "@/contexts";
+import { BreadcrumbCommon } from "@/components/layout/BreadcrumbCommon";
+import { cn } from "@/lib/utils";
 import { ModeToggle } from "../shared/mode-toggle";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface MainHeaderProps {
   className?: string;
-  activeGroup: Group;
-  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void;
+  activeGroup?: Group;
+  onAddUrl?: (url: string, name: string, pointToCenter?: boolean) => void;
 }
 
 export function MainHeader({
   className,
-  activeGroup,
-  onAddUrl,
-}: MainHeaderProps) {
+  activeGroup: activeGroupProp,
+  onAddUrl: onAddUrlProp,
+}: MainHeaderProps = {}) {
+  const visualizer = useVisualizer();
+  const activeGroup = activeGroupProp ?? visualizer.activeGroup;
+  const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
+  const { routes } = useBreadcrumb();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
   const [pointToCenter, setPointToCenter] = React.useState(false);
 
+  const isSettings = location.pathname === "/settings";
+  const isDetails = location.pathname.startsWith("/details");
+
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New URL",
-    description: `Add a new URL to ${activeGroup.name}`,
+    description: activeGroup
+      ? `Add a new URL to ${activeGroup.name}`
+      : "Add a new URL",
     side: "right",
     children: (
       <form onSubmit={handleAddUrl} className="flex flex-col gap-4 mt-4">
@@ -33,7 +47,7 @@ export function MainHeader({
           placeholder="Name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+          className="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
           autoFocus
         />
         <input
@@ -41,7 +55,7 @@ export function MainHeader({
           placeholder="https://example.com"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
+          className="w-full px-4 py-2 border border-border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
         />
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input
@@ -65,7 +79,7 @@ export function MainHeader({
 
   function handleAddUrl(e: React.FormEvent) {
     e.preventDefault();
-    if (!newUrl.trim() || !newName.trim()) return;
+    if (!newUrl.trim() || !newName.trim() || !onAddUrl) return;
 
     let urlToAdd = newUrl.trim();
     if (!urlToAdd.startsWith("http://") && !urlToAdd.startsWith("https://")) {
@@ -79,24 +93,38 @@ export function MainHeader({
     closeSheet();
   }
 
+  const getTitle = () => {
+    if (isSettings) return "Settings";
+    if (isDetails) return "Website Details";
+    return activeGroup?.name || "Visualizer";
+  };
+
   return (
     <header
       className={cn(
-        "px-6 py-4 border-b border-border flex items-center justify-between bg-background",
+        "h-[var(--header-height,3.5rem)] shrink-0 px-4 md:px-6 border-b border-border flex items-center justify-between bg-background gap-4",
         className,
       )}
     >
       {SheetFragment}
-      <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-4 mr-2" />
-        <h2 className="text-lg font-bold text-foreground">
-          {activeGroup.name}
-        </h2>
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <SidebarTrigger className="-ml-1 mr-2 shrink-0" />
+        {routes && routes.length > 0 ? (
+          <BreadcrumbCommon />
+        ) : (
+          <h2 className="text-lg font-bold text-foreground truncate">
+            {getTitle()}
+          </h2>
+        )}
       </div>
-      <Button onClick={openSheet} className="flex items-center gap-2">
-        <Plus size={18} /> <span className="hidden sm:inline">Add URL</span>
-      </Button>
-      <ModeToggle />
+      <div className="flex items-center gap-2">
+        {!isSettings && !isDetails && activeGroup && (
+          <Button onClick={openSheet} className="flex items-center gap-2">
+            <Plus size={18} /> <span className="hidden sm:inline">Add URL</span>
+          </Button>
+        )}
+        <ModeToggle />
+      </div>
     </header>
   );
 }

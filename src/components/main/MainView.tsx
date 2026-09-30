@@ -1,29 +1,46 @@
 import React from "react";
 import type { Group, LayoutType } from "@/types";
-import { MainHeader } from "@/components/main/MainHeader";
 import { IframeCard } from "@/components/main/IframeCard";
 import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
+import { useVisualizer, useBreadcrumb } from "@/contexts";
 
 interface MainViewProps {
   className?: string;
   activeGroup?: Group;
-  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void;
-  onEditUrl: (index: number, url: string, name: string, pointToCenter?: boolean) => void;
-  onDeleteUrl: (index: number) => void;
+  onAddUrl?: (url: string, name: string, pointToCenter?: boolean) => void;
+  onEditUrl?: (index: number, url: string, name: string, pointToCenter?: boolean) => void;
+  onDeleteUrl?: (index: number) => void;
   onChangeLayout?: (id: string, layout: LayoutType) => void;
 }
 
 export function MainView({
   className,
-  activeGroup,
-  onAddUrl,
-  onEditUrl,
-  onDeleteUrl,
-  onChangeLayout,
-}: MainViewProps) {
+  activeGroup: activeGroupProp,
+  onEditUrl: onEditUrlProp,
+  onDeleteUrl: onDeleteUrlProp,
+  onChangeLayout: onChangeLayoutProp,
+}: MainViewProps = {}) {
+  const visualizer = useVisualizer();
+  const activeGroup = activeGroupProp ?? visualizer.activeGroup;
+  const onEditUrl = onEditUrlProp ?? visualizer.editUrl;
+  const onDeleteUrl = onDeleteUrlProp ?? visualizer.deleteUrl;
+  const onChangeLayout = onChangeLayoutProp ?? visualizer.changeGroupLayout;
+  const { setRoutes } = useBreadcrumb();
+
+  React.useEffect(() => {
+    if (activeGroup) {
+      setRoutes?.([
+        { title: "Groups", href: "/" },
+        { title: activeGroup.name, href: "/" },
+      ]);
+    } else {
+      setRoutes?.([{ title: "Groups", href: "/" }]);
+    }
+  }, [activeGroup, setRoutes]);
+
   const [layout, setLayout] = React.useState<LayoutType>("md");
 
   React.useEffect(() => {
@@ -61,64 +78,60 @@ export function MainView({
   };
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
-      <MainHeader activeGroup={activeGroup} onAddUrl={onAddUrl} />
-
-      <div className="flex-1 p-6 overflow-y-auto bg-muted/10 flex flex-col">
-        {activeGroup.urls.length === 0 ? (
-          <EmptyUrlsState />
-        ) : (
-          <>
-            <div className="flex justify-end mb-4 gap-1">
-              <Button
-                variant={layout === "sm" ? "default" : "outline"}
-                size="icon"
-                onClick={() => handleSetLayout("sm")}
-                title="Small Grid"
-              >
-                <Grid3X3 size={18} />
-              </Button>
-              <Button
-                variant={layout === "md" ? "default" : "outline"}
-                size="icon"
-                onClick={() => handleSetLayout("md")}
-                title="Medium Grid"
-              >
-                <Grid2X2 size={18} />
-              </Button>
-              <Button
-                variant={layout === "lg" ? "default" : "outline"}
-                size="icon"
-                onClick={() => handleSetLayout("lg")}
-                title="Large Grid"
-              >
-                <LayoutGrid size={18} />
-              </Button>
-              <Button
-                variant={layout === "list" ? "default" : "outline"}
-                size="icon"
-                onClick={() => handleSetLayout("list")}
-                title="List View"
-              >
-                <List size={18} />
-              </Button>
-            </div>
-            <div className={getGridClass()}>
-              {activeGroup.urls.map((entry, index) => (
-                <div key={`${entry.url}-${index}`} className={layout === "list" ? "h-[500px]" : "h-full"}>
-                  <IframeCard
-                    url={entry.url}
-                    name={entry.name}
-                    pointToCenter={entry.pointToCenter}
-                    onDelete={() => onDeleteUrl(index)}
-                    onEdit={(url, name, pointToCenter) => onEditUrl(index, url, name, pointToCenter)}
-                  />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+    <div className={cn("flex flex-col gap-4 w-full", className)}>
+      {activeGroup.urls.length === 0 ? (
+        <EmptyUrlsState />
+      ) : (
+        <>
+          <div className="flex justify-end gap-1">
+            <Button
+              variant={layout === "sm" ? "default" : "outline"}
+              size="icon"
+              onClick={() => handleSetLayout("sm")}
+              title="Small Grid"
+            >
+              <Grid3X3 size={18} />
+            </Button>
+            <Button
+              variant={layout === "md" ? "default" : "outline"}
+              size="icon"
+              onClick={() => handleSetLayout("md")}
+              title="Medium Grid"
+            >
+              <Grid2X2 size={18} />
+            </Button>
+            <Button
+              variant={layout === "lg" ? "default" : "outline"}
+              size="icon"
+              onClick={() => handleSetLayout("lg")}
+              title="Large Grid"
+            >
+              <LayoutGrid size={18} />
+            </Button>
+            <Button
+              variant={layout === "list" ? "default" : "outline"}
+              size="icon"
+              onClick={() => handleSetLayout("list")}
+              title="List View"
+            >
+              <List size={18} />
+            </Button>
+          </div>
+          <div className={getGridClass()}>
+            {activeGroup.urls.map((entry, index) => (
+              <div key={`${entry.url}-${index}`} className={layout === "list" ? "h-[500px]" : "h-full"}>
+                <IframeCard
+                  url={entry.url}
+                  name={entry.name}
+                  pointToCenter={entry.pointToCenter}
+                  onDelete={() => onDeleteUrl(index)}
+                  onEdit={(url, name, pointToCenter) => onEditUrl(index, url, name, pointToCenter)}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
