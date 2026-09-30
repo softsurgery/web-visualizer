@@ -31,30 +31,6 @@ export function MainHeader({
     return activeGroup?.name || "Visualizer";
   };
 
-  React.useEffect(() => {
-    const updateTitle = () => {
-      const baseTitle = getTitle();
-      const expectedTitle =
-        baseTitle === "Visualizer"
-          ? "Web Visualizer"
-          : `${baseTitle} - Web Visualizer`;
-      if (document.title !== expectedTitle) {
-        document.title = expectedTitle;
-      }
-    };
-
-    updateTitle();
-
-    // Prevent Next.js from overriding the title on client navigations
-    const observer = new MutationObserver(updateTitle);
-    const titleElement = document.querySelector("title");
-    if (titleElement) {
-      observer.observe(titleElement, { childList: true });
-    }
-
-    return () => observer.disconnect();
-  }, [isSettings, isDetails, activeGroup?.name]);
-
   return (
     <header
       className={cn(

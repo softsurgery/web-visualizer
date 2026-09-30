@@ -6,6 +6,7 @@ import type { Group } from "@/types";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { useIntro } from "@/contexts/IntroContext";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import { useTabName } from "@/hooks/useTabName";
 
 interface SettingsViewProps {
   groups?: Group[];
@@ -18,6 +19,8 @@ export function SettingsView({ groups: groupsProp, onImportGroups: onImportGroup
   const onImportGroups = onImportGroupsProp ?? visualizer.importGroups;
   const { setIntro } = useIntro();
   const { setRoutes } = useBreadcrumb();
+  
+  useTabName("Settings");
 
   React.useEffect(() => {
     setIntro({

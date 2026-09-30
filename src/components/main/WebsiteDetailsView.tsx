@@ -6,6 +6,7 @@ import type { WebsiteData } from "@/components/main/IframeCard";
 import { useIntro } from "@/contexts/IntroContext";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useVisualizer } from "@/hooks/useVisualizer";
+import { useTabName } from "@/hooks/useTabName";
 
 interface WebsiteScanData {
   title: string;
@@ -33,6 +34,8 @@ export function WebsiteDetailsView() {
 
   const url = urlId ? decodeURIComponent(urlId) : "";
   const name = nameParam || "Website Details";
+  
+  useTabName(name);
 
   React.useEffect(() => {
     if (url) {

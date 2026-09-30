@@ -11,6 +11,7 @@ import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDnDGridService, SortableItem } from "@/hooks/useDnDGridService";
+import { useTabName } from "@/hooks/useTabName";
 
 interface MainViewProps {
   className?: string;
@@ -36,6 +37,8 @@ export function MainView({
   const onDeleteUrl = onDeleteUrlProp ?? visualizer.deleteUrl;
   const onChangeLayout = onChangeLayoutProp ?? visualizer.changeGroupLayout;
   const { setRoutes } = useBreadcrumb();
+  
+  useTabName(activeGroup ? activeGroup.name : "Web Visualizer");
 
   React.useEffect(() => {
     if (activeGroup) {
