@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WebsiteData } from "@/components/main/IframeCard";
-import { useIntro, useBreadcrumb } from "@/contexts";
+import { useIntro, useBreadcrumb, useVisualizer } from "@/contexts";
 
 interface WebsiteScanData {
   title: string;
@@ -18,6 +18,7 @@ export function WebsiteDetailsView() {
   const { urlId } = useParams();
   const { setIntro } = useIntro();
   const { setRoutes } = useBreadcrumb();
+  const { groups, activeGroup } = useVisualizer();
   
   const [scanData, setScanData] = React.useState<WebsiteScanData | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
@@ -29,18 +30,21 @@ export function WebsiteDetailsView() {
 
   React.useEffect(() => {
     if (url) {
+      const groupForUrl = groups.find((g) => g.urls.some((u) => u.url === url)) || activeGroup;
+      const groupName = groupForUrl?.name || "Group";
+
       setIntro({
         title: websiteData?.name || "Website Details",
         description: url,
       });
       setRoutes?.([
         { title: "Groups", href: "/" },
-        { title: "Details", href: `/details/${encodeURIComponent(url)}` },
+        { title: groupName, href: "/" },
         { title: websiteData?.name || url },
       ]);
     }
     return () => setIntro({});
-  }, [url, websiteData?.name, setIntro, setRoutes]);
+  }, [url, websiteData?.name, groups, activeGroup, setIntro, setRoutes]);
 
   React.useEffect(() => {
     if (!url) return;

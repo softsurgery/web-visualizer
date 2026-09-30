@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { Group } from "@/types";
 import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { useVisualizer, useBreadcrumb } from "@/contexts";
 import { BreadcrumbCommon } from "@/components/layout/BreadcrumbCommon";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "../shared/mode-toggle";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 interface MainHeaderProps {
   className?: string;
@@ -26,7 +26,6 @@ export function MainHeader({
   const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
   const { routes } = useBreadcrumb();
   const location = useLocation();
-  const navigate = useNavigate();
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
   const [pointToCenter, setPointToCenter] = React.useState(false);
