@@ -6,12 +6,43 @@ export const Groups: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      return {
+        users: {
+          in: [user.id],
+        },
+      }
+    },
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      return {
+        users: {
+          in: [user.id],
+        },
+      }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      return {
+        users: {
+          in: [user.id],
+        },
+      }
+    },
   },
   fields: [
+    {
+      name: 'users',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      required: true,
+      admin: {
+        description: 'Users who have access to this group.',
+      },
+    },
     {
       name: 'name',
       type: 'text',

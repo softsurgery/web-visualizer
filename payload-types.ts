@@ -149,6 +149,10 @@ export interface User {
  */
 export interface Group {
   id: number;
+  /**
+   * Users who have access to this group.
+   */
+  users: (number | User)[];
   name: string;
   layout?: ('sm' | 'md' | 'lg' | 'list') | null;
   urls?:
@@ -264,6 +268,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "groups_select".
  */
 export interface GroupsSelect<T extends boolean = true> {
+  users?: T;
   name?: T;
   layout?: T;
   urls?:
