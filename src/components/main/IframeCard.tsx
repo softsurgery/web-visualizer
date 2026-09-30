@@ -175,8 +175,8 @@ export function IframeCard({
       {DialogFragment}
       {EditDialogFragment}
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-20 relative">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-1 min-w-0 flex-1 pr-2">
+          <div className="flex items-center gap-2 min-w-0">
             <div
               className={cn(
                 "w-2 h-2 rounded-full shrink-0",
@@ -196,7 +196,7 @@ export function IframeCard({
             href={url}
             target="_blank"
             rel="noreferrer"
-            className="text-sm font-medium hover:underline truncate text-muted-foreground"
+            className="text-sm font-medium hover:underline truncate text-muted-foreground block"
           >
             {url}
           </a>
