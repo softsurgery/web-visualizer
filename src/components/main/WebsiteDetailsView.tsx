@@ -51,7 +51,7 @@ export function WebsiteDetailsView() {
   if (!url) {
     return (
       <div className="flex flex-col h-full bg-background items-center justify-center">
-        <h2 className="text-2xl font-bold">Details not found</h2>
+        <h2 className="text-2xl font-bold text-foreground">Details not found</h2>
         <Button onClick={() => navigate("/")} className="mt-4">Go Back</Button>
       </div>
     );
@@ -82,7 +82,7 @@ export function WebsiteDetailsView() {
               </div>
               <div className="grid grid-cols-4 gap-2 border-b border-border pb-2">
                 <span className="text-muted-foreground font-medium">URL:</span>
-                <a href={url} target="_blank" rel="noreferrer" className="col-span-3 text-blue-500 hover:underline break-all">
+                <a href={url} target="_blank" rel="noreferrer" className="col-span-3 text-primary hover:underline break-all">
                   {url}
                 </a>
               </div>
@@ -102,7 +102,7 @@ export function WebsiteDetailsView() {
             </div>
             
             {scanError ? (
-              <p className="text-sm text-red-500">Could not fetch website data: {scanError}</p>
+              <p className="text-sm text-destructive">Could not fetch website data: {scanError}</p>
             ) : scanData ? (
               <div className="flex flex-col gap-3 text-sm">
                 <div className="grid grid-cols-4 gap-2 border-b border-border pb-2">

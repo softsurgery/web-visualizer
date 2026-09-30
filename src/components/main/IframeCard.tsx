@@ -89,7 +89,7 @@ export function IframeCard({
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete URL",
     description: `Are you sure you want to remove "${name}" from this group?`,
-    children: (isOpen, close) => (
+    children: (_isOpen, close) => (
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="outline" onClick={close}>
           Cancel
@@ -111,7 +111,7 @@ export function IframeCard({
     useDialog({
       title: "Edit URL",
       description: "Update the details for this URL.",
-      children: (isOpen, close) => (
+      children: (_isOpen, close) => (
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -177,10 +177,10 @@ export function IframeCard({
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
               isChecking
-                ? "bg-yellow-500"
+                ? "bg-warning"
                 : useProxy
-                  ? "bg-orange-500"
-                  : "bg-green-500"
+                  ? "bg-warning"
+                  : "bg-success"
             }`}
             title={
               isChecking
@@ -223,7 +223,7 @@ export function IframeCard({
               e.stopPropagation();
               openDialog();
             }}
-            className="text-muted-foreground hover:text-red-500 h-8 w-8 transition"
+            className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
             title="Remove URL"
           >
             <X size={16} />

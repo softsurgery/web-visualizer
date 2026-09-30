@@ -57,7 +57,7 @@ export function GroupItem({
           onSelect(group.id);
           navigate("/");
         }}
-        className="justify-between group-hover:bg-sidebar-accent"
+        className="justify-between"
       >
         <div className="flex items-center gap-2 overflow-hidden">
           <LayoutGrid className="size-4 shrink-0 text-sidebar-primary" />
@@ -69,7 +69,7 @@ export function GroupItem({
           e.stopPropagation();
           openDialog();
         }}
-        className="text-muted-foreground hover:text-red-500"
+        className="text-muted-foreground hover:text-destructive"
         title="Delete group"
       >
         <X size={16} />

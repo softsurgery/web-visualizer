@@ -89,7 +89,7 @@ export function MainHeader({
       {SheetFragment}
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-4 mr-2" />
-        <h2 className="text-md font-bold text-foreground">
+        <h2 className="text-lg font-bold text-foreground">
           {activeGroup.name}
         </h2>
       </div>

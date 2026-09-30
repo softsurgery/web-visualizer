@@ -13,8 +13,7 @@ export function SidebarHeader({ className }: SidebarHeaderProps = {}) {
           <GalleryVerticalEnd className="size-4" />
         </div>
         <div className="flex flex-col gap-0.5 leading-none">
-          <span className="font-semibold text-sm">Visualizer Inc</span>
-          <span className="text-xs text-muted-foreground">Workspace</span>
+          <span className="font-semibold text-sm text-sidebar-foreground">Visualizer</span>
         </div>
       </div>
     </div>

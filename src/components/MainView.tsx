@@ -30,7 +30,7 @@ export function MainView({
 
   if (!activeGroup) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-gray-400 h-full">
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground h-full bg-background">
         <Menu size={48} className="mb-4 opacity-20" />
         <p className="text-lg">Select a group or create a new one.</p>
       </div>
@@ -39,10 +39,10 @@ export function MainView({
 
   return (
     <>
-      <header className="px-6 py-4 border-b border-gray-200 flex items-center justify-between md:pl-6 pl-16 bg-white">
+      <header className="px-6 py-4 border-b border-border flex items-center justify-between md:pl-6 pl-16 bg-background">
         <div>
-          <h2 className="text-2xl font-bold">{activeGroup.name}</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-foreground">{activeGroup.name}</h2>
+          <p className="text-sm text-muted-foreground">
             {activeGroup.urls.length} URLs in this group
           </p>
         </div>
@@ -52,62 +52,66 @@ export function MainView({
             placeholder="https://example.com"
             value={newUrl}
             onChange={(e) => setNewUrl(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-input rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           />
           <button
             type="submit"
             disabled={!newUrl.trim()}
-            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50 font-medium flex items-center gap-2 transition"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 font-medium flex items-center gap-2 transition"
           >
             <Plus size={18} /> <span className="hidden sm:inline">Add URL</span>
           </button>
         </form>
       </header>
 
-      <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
+      <div className="flex-1 p-6 overflow-y-auto bg-muted/10">
         {activeGroup.urls.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400">
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
             <ExternalLink size={48} className="mb-4 opacity-20" />
             <p className="text-lg">No URLs in this group.</p>
             <p className="text-sm mt-1">Add one using the input above.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full auto-rows-[500px]">
-            {activeGroup.urls.map((url, index) => (
-              <div
-                key={`${url}-${index}`}
-                className="flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden h-full"
-              >
-                <div className="px-4 py-2 bg-gray-100 border-b border-gray-200 flex justify-between items-center">
-                  <div className="flex items-center gap-2 truncate max-w-[80%]">
-                    <span className="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm font-medium hover:underline truncate"
+            {activeGroup.urls.map((entry, index) => {
+              const url = typeof entry === "string" ? entry : entry.url;
+              const displayName = typeof entry === "string" ? entry : (entry.name || entry.url);
+              return (
+                <div
+                  key={`${url}-${index}`}
+                  className="flex flex-col bg-card text-card-foreground rounded-lg border border-border shadow-sm overflow-hidden h-full"
+                >
+                  <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center">
+                    <div className="flex items-center gap-2 truncate max-w-[80%]">
+                      <span className="w-2 h-2 rounded-full bg-success shrink-0"></span>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium hover:underline truncate"
+                      >
+                        {displayName}
+                      </a>
+                    </div>
+                    <button
+                      onClick={() => onDeleteUrl(index)}
+                      className="text-muted-foreground hover:text-destructive p-1.5 rounded hover:bg-muted transition"
+                      title="Remove URL"
                     >
-                      {url}
-                    </a>
+                      <X size={16} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => onDeleteUrl(index)}
-                    className="text-gray-400 hover:text-red-500 p-1.5 rounded hover:bg-white transition"
-                    title="Remove URL"
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="flex-1 relative bg-muted/20">
+                    <iframe
+                      src={url}
+                      className="absolute inset-0 w-full h-full border-0"
+                      title={`Visualizer - ${displayName}`}
+                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                    />
+                  </div>
                 </div>
-                <div className="flex-1 relative bg-gray-50">
-                  <iframe
-                    src={url}
-                    className="absolute inset-0 w-full h-full border-0"
-                    title={`Visualizer - ${url}`}
-                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
