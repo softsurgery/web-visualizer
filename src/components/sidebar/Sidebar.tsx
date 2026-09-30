@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { useVisualizer } from "@/contexts";
+import { useVisualizer } from "@/hooks/useVisualizer";
 
 interface SidebarProps {
   className?: string;

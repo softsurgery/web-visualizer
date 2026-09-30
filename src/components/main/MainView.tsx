@@ -5,7 +5,8 @@ import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useVisualizer, useBreadcrumb } from "@/contexts";
+import { useVisualizer } from "@/hooks/useVisualizer";
+import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 
 interface MainViewProps {
   className?: string;

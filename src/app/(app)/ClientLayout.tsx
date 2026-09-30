@@ -2,7 +2,9 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useFooter, useIntro, useUI } from "@/contexts";
+import { useFooter } from "@/contexts/FooterContext";
+import { useIntro } from "@/contexts/IntroContext";
+import { useUI } from "@/contexts/UIContext";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";

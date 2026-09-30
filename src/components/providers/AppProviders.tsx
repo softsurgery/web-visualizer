@@ -1,11 +1,9 @@
 import { type ReactNode } from "react";
-import {
-  UIProvider,
-  IntroProvider,
-  FooterProvider,
-  VisualizerProvider,
-  BreadcrumbProvider,
-} from "@/contexts";
+import { UIProvider } from "@/contexts/UIContext";
+import { IntroProvider } from "@/contexts/IntroContext";
+import { FooterProvider } from "@/contexts/FooterContext";
+
+import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 
 interface AppProvidersProps {
   children?: ReactNode;
@@ -13,17 +11,15 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <VisualizerProvider>
-      <UIProvider>
-        <IntroProvider>
-          <FooterProvider>
-            <BreadcrumbProvider>
-              {children}
-            </BreadcrumbProvider>
-          </FooterProvider>
-        </IntroProvider>
-      </UIProvider>
-    </VisualizerProvider>
+    <UIProvider>
+      <IntroProvider>
+        <FooterProvider>
+          <BreadcrumbProvider>
+            {children}
+          </BreadcrumbProvider>
+        </FooterProvider>
+      </IntroProvider>
+    </UIProvider>
   );
 }
 

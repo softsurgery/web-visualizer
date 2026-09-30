@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { useBreadcrumb, type BreadcrumbRoute } from "@/contexts";
+import { useBreadcrumb, type BreadcrumbRoute } from "@/contexts/BreadcrumbContext";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,

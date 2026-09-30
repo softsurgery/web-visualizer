@@ -3,7 +3,9 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WebsiteData } from "@/components/main/IframeCard";
-import { useIntro, useBreadcrumb, useVisualizer } from "@/contexts";
+import { useIntro } from "@/contexts/IntroContext";
+import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import { useVisualizer } from "@/hooks/useVisualizer";
 
 interface WebsiteScanData {
   title: string;

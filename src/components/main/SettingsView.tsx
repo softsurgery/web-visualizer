@@ -1,9 +1,11 @@
 import React from "react";
 import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StorageService } from "@/services/StorageService";
+
 import type { Group } from "@/types";
-import { useVisualizer, useIntro, useBreadcrumb } from "@/contexts";
+import { useVisualizer } from "@/hooks/useVisualizer";
+import { useIntro } from "@/contexts/IntroContext";
+import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 
 interface SettingsViewProps {
   groups?: Group[];
@@ -31,8 +33,27 @@ export function SettingsView({ groups: groupsProp, onImportGroups: onImportGroup
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleExport = () => {
-    StorageService.exportGroups(groups);
+  const handleExport = async () => {
+    try {
+      const res = await fetch("/api/groups?limit=1000");
+      if (!res.ok) throw new Error("Failed to fetch groups from database");
+      const data = await res.json();
+      
+      let exportData = data.docs;
+      if (!exportData) exportData = [];
+
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "groups-export.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Export failed", e);
+      alert("Failed to export database");
+    }
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +61,39 @@ export function SettingsView({ groups: groupsProp, onImportGroups: onImportGroup
     if (!file) return;
 
     try {
-      const importedGroups = await StorageService.importGroups(file);
-      onImportGroups(importedGroups);
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string);
+          if (Array.isArray(parsed)) {
+            const migrated = parsed.map((g: any) => ({
+              ...g,
+              urls: (g.urls || []).map((u: any) => 
+                typeof u === 'string' ? { url: u, name: u } : u
+              )
+            }));
+            
+            const res = await fetch('/api/groups/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(migrated)
+            });
+
+            if (!res.ok) {
+              const err = await res.json();
+              throw new Error(err.error || "Database sync failed");
+            }
+
+            onImportGroups(migrated);
+          } else {
+            throw new Error("Invalid JSON format");
+          }
+        } catch (error: any) {
+          alert(error.message || "Error parsing JSON file or syncing to database");
+        }
+      };
+      reader.onerror = () => alert("Error reading file");
+      reader.readAsText(file);
     } catch (error: any) {
       alert(error.message);
     }
