@@ -2,7 +2,7 @@ import { X, Edit2 } from "lucide-react";
 import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { DESKTOP_WIDTH } from "./constants";
 import { cn } from "cn";
 
@@ -30,7 +30,7 @@ export function IframeCard({
   onEdit,
 }: IframeCardProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
   const [scale, setScale] = React.useState(1);
   const [useProxy, setUseProxy] = React.useState(false);
   const [isChecking, setIsChecking] = React.useState(true);
@@ -49,7 +49,7 @@ export function IframeCard({
 
   React.useEffect(() => {
     setIsChecking(true);
-    fetch(`/__check-frameable?url=${encodeURIComponent(url)}`)
+    fetch(`/api/__check-frameable?url=${encodeURIComponent(url)}`)
       .then((res) => res.json())
       .then((data) => {
         setUseProxy(!data.frameable);
@@ -155,12 +155,9 @@ export function IframeCard({
     });
 
   const handleCardClick = () => {
-    const data: WebsiteData = {
-      url,
-      name,
-      isProxied: useProxy,
-    };
-    navigate(`/details/${encodeURIComponent(url)}`, { state: data });
+    router.push(
+      `/details/${encodeURIComponent(url)}?name=${encodeURIComponent(name)}&isProxied=${useProxy}`,
+    );
   };
 
   return (

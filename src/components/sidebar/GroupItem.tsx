@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuAction,
 } from "@/components/ui/sidebar";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 interface GroupItemProps {
   className?: string;
@@ -46,7 +46,7 @@ export function GroupItem({
     ),
   });
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <SidebarMenuItem className={className}>
@@ -55,7 +55,7 @@ export function GroupItem({
         isActive={isActive}
         onClick={() => {
           onSelect(group.id);
-          navigate("/");
+          router.push("/");
         }}
         className="justify-between"
       >

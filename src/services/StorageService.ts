@@ -4,6 +4,7 @@ export class StorageService {
   private static STORAGE_KEY = "visualizer-groups";
 
   static getGroups(): Group[] {
+    if (typeof window === "undefined") return [];
     const saved = localStorage.getItem(this.STORAGE_KEY);
     if (saved) {
       try {
@@ -23,6 +24,7 @@ export class StorageService {
   }
 
   static saveGroups(groups: Group[]): void {
+    if (typeof window === "undefined") return;
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(groups));
   }
 

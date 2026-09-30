@@ -121,6 +121,35 @@ export function VisualizerProvider({ children }: { children: ReactNode }) {
     return loadedGroups.length > 0 ? loadedGroups[0].id : null;
   });
 
+  // Try to sync with Payload CMS API on mount
+  useEffect(() => {
+    async function syncPayloadGroups() {
+      try {
+        const res = await fetch("/api/groups");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.docs && Array.isArray(data.docs) && data.docs.length > 0) {
+            const payloadGroups: Group[] = data.docs.map((doc: any) => ({
+              id: String(doc.id),
+              name: doc.name,
+              layout: doc.layout,
+              urls: (doc.urls || []).map((u: any) => ({
+                url: u.url,
+                name: u.name,
+                pointToCenter: u.pointToCenter,
+              })),
+            }));
+            setGroups(payloadGroups);
+            setActiveGroupId((prev) => (prev && payloadGroups.some((g) => g.id === prev) ? prev : payloadGroups[0].id));
+          }
+        }
+      } catch {
+        // Fallback to LocalStorage
+      }
+    }
+    syncPayloadGroups();
+  }, []);
+
   useEffect(() => {
     StorageService.saveGroups(groups);
   }, [groups]);

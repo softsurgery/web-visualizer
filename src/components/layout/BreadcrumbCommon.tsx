@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useBreadcrumb, type BreadcrumbRoute } from "@/contexts";
 import {
   Breadcrumb,
@@ -28,7 +28,7 @@ function Crumb({
   const crumb =
     route.href && !isLast ? (
       <BreadcrumbLink asChild>
-        <Link to={route.href}>{title}</Link>
+        <Link href={route.href}>{title}</Link>
       </BreadcrumbLink>
     ) : (
       <BreadcrumbPage>{title}</BreadcrumbPage>

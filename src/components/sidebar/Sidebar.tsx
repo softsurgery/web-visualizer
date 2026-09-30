@@ -3,7 +3,8 @@ import type { Group } from "@/types";
 import { GroupItem } from "@/components/sidebar/GroupItem";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
 import {
   Sidebar as ShadcnSidebar,
@@ -44,7 +45,12 @@ export function Sidebar({
   const onAddGroup = onAddGroupProp ?? visualizer.addGroup;
   const onDeleteGroup = onDeleteGroupProp ?? visualizer.deleteGroup;
   const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
-  const location = useLocation();
+  const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <ShadcnSidebar variant={variant} className={className}>
@@ -53,7 +59,11 @@ export function Sidebar({
       </ShadcnSidebarHeader>
 
       <SidebarContent>
-        {groups.length === 0 ? (
+        {!mounted ? (
+           <SidebarGroup>
+             <SidebarGroupLabel>Groups</SidebarGroupLabel>
+           </SidebarGroup>
+        ) : groups.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground text-sm">
             No groups yet. Create one above!
           </div>
@@ -66,7 +76,7 @@ export function Sidebar({
                   <GroupItem
                     key={group.id}
                     group={group}
-                    isActive={activeGroupId === group.id && location.pathname === "/"}
+                    isActive={activeGroupId === group.id && pathname === "/"}
                     onSelect={onSetActiveGroup}
                     onDelete={onDeleteGroup}
                   />
@@ -80,7 +90,7 @@ export function Sidebar({
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/settings" />} isActive={location.pathname === "/settings"}>
+            <SidebarMenuButton render={<Link href="/settings" />} isActive={pathname === "/settings"}>
               <Settings className="size-4" />
               <span>Settings</span>
             </SidebarMenuButton>

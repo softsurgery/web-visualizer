@@ -8,7 +8,7 @@ import { useVisualizer, useBreadcrumb } from "@/contexts";
 import { BreadcrumbCommon } from "@/components/layout/BreadcrumbCommon";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "../shared/mode-toggle";
-import { useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
 
 interface MainHeaderProps {
   className?: string;
@@ -25,13 +25,13 @@ export function MainHeader({
   const activeGroup = activeGroupProp ?? visualizer.activeGroup;
   const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
   const { routes } = useBreadcrumb();
-  const location = useLocation();
+  const pathname = usePathname();
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
   const [pointToCenter, setPointToCenter] = React.useState(false);
 
-  const isSettings = location.pathname === "/settings";
-  const isDetails = location.pathname.startsWith("/details");
+  const isSettings = pathname === "/settings";
+  const isDetails = pathname?.startsWith("/details");
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New URL",
@@ -101,7 +101,7 @@ export function MainHeader({
   return (
     <header
       className={cn(
-        "h-[var(--header-height,3.5rem)] shrink-0 px-4 md:px-6 border-b border-border flex items-center justify-between bg-background gap-4",
+        "sticky top-0 z-50 h-[var(--header-height,3.5rem)] shrink-0 px-4 md:px-6 border-b border-border flex items-center justify-between bg-background gap-4",
         className,
       )}
     >
