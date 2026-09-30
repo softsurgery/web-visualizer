@@ -77,11 +77,18 @@ export function IframeCard({
         // avoid dividing by zero or setting scale too high
         setScale(Math.max(0.1, width / DESKTOP_WIDTH));
       }
+      
+      if (pointToCenter && !isChecking && !useProxy) {
+        setTimeout(() => {
+          container.scrollTop =
+            container.scrollHeight / 2 - container.clientHeight / 2;
+        }, 10);
+      }
     });
 
     observer.observe(container);
 
-    if (pointToCenter && !isChecking) {
+    if (pointToCenter && !isChecking && !useProxy) {
       setTimeout(() => {
         container.scrollTop =
           container.scrollHeight / 2 - container.clientHeight / 2;
@@ -89,7 +96,7 @@ export function IframeCard({
     }
 
     return () => observer.disconnect();
-  }, [isChecking, pointToCenter]);
+  }, [isChecking, pointToCenter, useProxy]);
 
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete URL",
