@@ -53,7 +53,20 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
               pointToCenter: u.pointToCenter,
             })),
           }));
-          set({ groups: payloadGroups, activeGroupId: payloadGroups[0].id });
+          
+          let initialActiveId = payloadGroups[0].id;
+          if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const groupName = params.get("group");
+            if (groupName) {
+              const found = payloadGroups.find((g) => g.name === groupName);
+              if (found) {
+                initialActiveId = found.id;
+              }
+            }
+          }
+
+          set({ groups: payloadGroups, activeGroupId: initialActiveId });
         }
       }
     } catch {

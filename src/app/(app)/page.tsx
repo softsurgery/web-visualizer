@@ -1,6 +1,10 @@
 "use client";
 
-import { MainView } from "@/components/main/MainView";
+import dynamic from "next/dynamic";
+
+const MainView = dynamic(() => import("@/components/main/MainView").then(mod => mod.MainView), {
+  ssr: false,
+});
 
 export default function HomePage() {
   return <MainView />;

@@ -187,7 +187,7 @@ export function IframeCard({
                     : "bg-success",
               )}
             ></div>
-            <span className="text-xs font-semibold text-foreground truncate">
+            <span className="text-xs font-semibold text-foreground truncate" title={name}>
               {name}
             </span>
           </div>
@@ -196,6 +196,7 @@ export function IframeCard({
             href={url}
             target="_blank"
             rel="noreferrer"
+            title={url}
             className="text-sm font-medium hover:underline truncate text-muted-foreground block"
           >
             {url}

@@ -4,6 +4,8 @@ import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 
+import { useRouter } from "next/navigation";
+
 interface SidebarActionsProps {
   className?: string;
   onAddGroup: (name: string) => void;
@@ -14,6 +16,7 @@ export function SidebarActions({
   onAddGroup,
 }: SidebarActionsProps) {
   const [newGroupName, setNewGroupName] = React.useState("");
+  const router = useRouter();
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New Group",
@@ -40,8 +43,10 @@ export function SidebarActions({
     e.preventDefault();
     if (!newGroupName.trim()) return;
     onAddGroup(newGroupName);
+    const nameToPush = newGroupName.trim();
     setNewGroupName("");
     closeSheet();
+    router.push(`/?group=${encodeURIComponent(nameToPush)}`);
   }
 
   return (
