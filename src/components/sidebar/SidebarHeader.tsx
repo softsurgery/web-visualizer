@@ -1,5 +1,4 @@
-import { GalleryVerticalEnd } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
+import { GalleryVerticalEnd } from "lucide-react";
 import { cn } from "cn";
 
 interface SidebarHeaderProps {
@@ -18,7 +17,6 @@ export function SidebarHeader({ className }: SidebarHeaderProps = {}) {
           <span className="text-xs text-muted-foreground">Workspace</span>
         </div>
       </div>
-      <ModeToggle />
     </div>
   );
 }

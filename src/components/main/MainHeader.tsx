@@ -5,6 +5,7 @@ import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "cn";
+import { ModeToggle } from "../shared/mode-toggle";
 
 interface MainHeaderProps {
   className?: string;
@@ -88,18 +89,14 @@ export function MainHeader({
       {SheetFragment}
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-4 mr-2" />
-        <div>
-          <h2 className="text-md font-bold text-foreground">
-            {activeGroup.name}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {activeGroup.urls.length} URLs in this group
-          </p>
-        </div>
+        <h2 className="text-md font-bold text-foreground">
+          {activeGroup.name}
+        </h2>
       </div>
       <Button onClick={openSheet} className="flex items-center gap-2">
         <Plus size={18} /> <span className="hidden sm:inline">Add URL</span>
       </Button>
+      <ModeToggle />
     </header>
   );
 }
