@@ -19,6 +19,10 @@ import {
   SidebarMenuButton
 } from "@/components/ui/sidebar";
 import { useVisualizer } from "@/hooks/useVisualizer";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useDnDService } from "@/hooks/useDnDService";
+import { SortableItem } from "@/hooks/useDnDGridService";
 
 interface SidebarProps {
   className?: string;
@@ -48,6 +52,21 @@ export function Sidebar({
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
 
+  const { items: renderedGroups, handleDragEnd } = useDnDService({
+    items: groups,
+    setItems: visualizer.reorderGroups,
+    getId: (item) => item.id,
+    renderChild: (group) => (
+      <GroupItem
+        key={group.id}
+        group={group}
+        isActive={activeGroupId === group.id && pathname === "/"}
+        onSelect={onSetActiveGroup}
+        onDelete={onDeleteGroup}
+      />
+    ),
+  });
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -73,15 +92,26 @@ export function Sidebar({
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarActions onAddGroup={onAddGroup} />
-                {groups.map((group) => (
-                  <GroupItem
-                    key={group.id}
-                    group={group}
-                    isActive={activeGroupId === group.id && pathname === "/"}
-                    onSelect={onSetActiveGroup}
-                    onDelete={onDeleteGroup}
-                  />
-                ))}
+                <DndContext
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={groups.map(g => g.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {renderedGroups.map((rg) => (
+                      <SortableItem key={rg.id} id={rg.id}>
+                        {({ attributes, listeners }) => (
+                          // @ts-ignore
+                          React.cloneElement(rg.child as React.ReactElement, {
+                            dragHandleProps: { attributes, listeners }
+                          })
+                        )}
+                      </SortableItem>
+                    ))}
+                  </SortableContext>
+                </DndContext>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

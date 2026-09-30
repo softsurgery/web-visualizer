@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     })
 
     // Create new groups
+    let orderIndex = 0;
     for (const group of groups) {
       await payload.create({
         collection: 'groups',
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
           layout: group.layout || 'md',
           urls: group.urls || [],
           users: [user.id as any],
+          // @ts-ignore
+          order: orderIndex++,
         }
       })
     }

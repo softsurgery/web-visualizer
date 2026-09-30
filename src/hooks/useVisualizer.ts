@@ -1,17 +1,22 @@
 import React, { useEffect } from "react";
 import { create } from "zustand";
 import type { Group, LayoutType } from "@/types";
+let syncTimeout: NodeJS.Timeout | null = null;
 const syncGroupsToDB = async (groups: Group[]) => {
   if (typeof window === "undefined") return;
-  try {
-    await fetch('/api/groups/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(groups)
-    });
-  } catch (e) {
-    console.error("Failed to sync groups to database", e);
-  }
+  if (syncTimeout) clearTimeout(syncTimeout);
+  
+  syncTimeout = setTimeout(async () => {
+    try {
+      await fetch('/api/groups/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(groups)
+      });
+    } catch (e) {
+      console.error("Failed to sync groups to database", e);
+    }
+  }, 300);
 };
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,6 +33,7 @@ interface VisualizerStore {
   importGroups: (groups: Group[]) => void;
   changeGroupLayout: (id: string, layout: LayoutType) => void;
   reorderUrls: (groupId: string, newUrls: Group['urls']) => void;
+  reorderGroups: (newGroups: Group[]) => void;
   initialize: () => Promise<void>;
 }
 
@@ -39,7 +45,7 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
   initialize: async () => {
     if (get().isInitialized) return;
     try {
-      const res = await fetch("/api/groups");
+      const res = await fetch("/api/groups?sort=order&limit=1000");
       if (res.ok) {
         const data = await res.json();
         if (data.docs && Array.isArray(data.docs) && data.docs.length > 0) {
@@ -157,6 +163,12 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
   reorderUrls: (groupId: string, newUrls: Group['urls']) => {
     const { groups, isInitialized } = get();
     const newGroups = groups.map((g) => (g.id === groupId ? { ...g, urls: newUrls } : g));
+    set({ groups: newGroups });
+    if (isInitialized) syncGroupsToDB(newGroups);
+  },
+
+  reorderGroups: (newGroups: Group[]) => {
+    const { isInitialized } = get();
     set({ groups: newGroups });
     if (isInitialized) syncGroupsToDB(newGroups);
   },

@@ -1,5 +1,5 @@
 import React from "react";
-import { X, LayoutGrid } from "lucide-react";
+import { X, LayoutGrid, GripVertical } from "lucide-react";
 import type { Group } from "@/types";
 import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ interface GroupItemProps {
   isActive: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
+  dragHandleProps?: { attributes: any; listeners: any };
 }
 
 export function GroupItem({
@@ -24,6 +25,7 @@ export function GroupItem({
   isActive,
   onSelect,
   onDelete,
+  dragHandleProps,
 }: GroupItemProps) {
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete Group",
@@ -61,7 +63,18 @@ export function GroupItem({
         className="justify-between"
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <LayoutGrid className="size-4 shrink-0 text-sidebar-primary" />
+          {dragHandleProps ? (
+            <div
+              {...dragHandleProps.attributes}
+              {...dragHandleProps.listeners}
+              className="cursor-grab text-muted-foreground hover:text-foreground shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GripVertical className="size-4" />
+            </div>
+          ) : (
+            <LayoutGrid className="size-4 shrink-0 text-sidebar-primary" />
+          )}
           <span className="truncate">{group.name}</span>
         </div>
       </SidebarMenuButton>

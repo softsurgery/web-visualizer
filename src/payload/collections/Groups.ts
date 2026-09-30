@@ -60,6 +60,11 @@ export const Groups: CollectionConfig = {
       ],
     },
     {
+      name: 'order',
+      type: 'number',
+      defaultValue: 0,
+    },
+    {
       name: 'urls',
       type: 'array',
       fields: [

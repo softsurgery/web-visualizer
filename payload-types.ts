@@ -155,6 +155,7 @@ export interface Group {
   users: (number | User)[];
   name: string;
   layout?: ('sm' | 'md' | 'lg' | 'list') | null;
+  order?: number | null;
   urls?:
     | {
         name: string;
@@ -271,6 +272,7 @@ export interface GroupsSelect<T extends boolean = true> {
   users?: T;
   name?: T;
   layout?: T;
+  order?: T;
   urls?:
     | T
     | {
