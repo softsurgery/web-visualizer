@@ -62,10 +62,10 @@ function LayoutShell({ className, children }: LayoutProps) {
             )}
             <div
               className={cn(
-                "flex flex-col",
+                "flex flex-col flex-1",
                 enableMainOverflow
                   ? "overflow-visible"
-                  : "min-h-0 flex-1 overflow-hidden",
+                  : "min-h-0 overflow-hidden",
               )}
             >
               {children}

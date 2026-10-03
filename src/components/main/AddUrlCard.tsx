@@ -10,14 +10,29 @@ interface AddUrlCardProps {
   onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void;
 }
 
-export function AddUrlCard({
-  className,
-  groupName,
-  onAddUrl,
-}: AddUrlCardProps) {
+export function useAddUrlSheet(
+  groupName: string | undefined,
+  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void
+) {
   const [newUrl, setNewUrl] = React.useState("");
   const [newName, setNewName] = React.useState("");
   const [pointToCenter, setPointToCenter] = React.useState(false);
+
+  function handleAddUrl(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newUrl.trim() || !newName.trim()) return;
+
+    let urlToAdd = newUrl.trim();
+    if (!urlToAdd.startsWith("http://") && !urlToAdd.startsWith("https://")) {
+      urlToAdd = "https://" + urlToAdd;
+    }
+
+    onAddUrl(urlToAdd, newName.trim(), pointToCenter);
+    setNewUrl("");
+    setNewName("");
+    setPointToCenter(false);
+    closeSheet();
+  }
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New URL",
@@ -60,21 +75,15 @@ export function AddUrlCard({
     ),
   });
 
-  function handleAddUrl(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newUrl.trim() || !newName.trim()) return;
+  return { SheetFragment, openSheet, closeSheet };
+}
 
-    let urlToAdd = newUrl.trim();
-    if (!urlToAdd.startsWith("http://") && !urlToAdd.startsWith("https://")) {
-      urlToAdd = "https://" + urlToAdd;
-    }
-
-    onAddUrl(urlToAdd, newName.trim(), pointToCenter);
-    setNewUrl("");
-    setNewName("");
-    setPointToCenter(false);
-    closeSheet();
-  }
+export function AddUrlCard({
+  className,
+  groupName,
+  onAddUrl,
+}: AddUrlCardProps) {
+  const { SheetFragment, openSheet } = useAddUrlSheet(groupName, onAddUrl);
 
   return (
     <div
