@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import type { Group } from "@/types";
 import { GroupItem } from "@/components/sidebar/GroupItem";

@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect } from "react";
 import { create } from "zustand";
 import type { Group, LayoutType } from "@/types";

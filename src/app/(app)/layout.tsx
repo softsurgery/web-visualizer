@@ -26,7 +26,7 @@ export default async function RootLayout({
   }
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased font-sans bg-background text-foreground">
+      <body className="antialiased font-sans bg-background text-foreground" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
