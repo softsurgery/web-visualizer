@@ -6,6 +6,7 @@ import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
+import { UserDropdown } from "@/components/sidebar/UserDropdown";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -119,6 +120,7 @@ export function Sidebar({
 
       <SidebarFooter>
         <SidebarMenu>
+          <UserDropdown />
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link href="/settings" />} isActive={pathname === "/settings"}>
               <Settings className="size-4" />
