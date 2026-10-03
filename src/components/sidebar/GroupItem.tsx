@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { X, LayoutGrid, GripVertical } from "lucide-react";
 import type { Group } from "@/types";
