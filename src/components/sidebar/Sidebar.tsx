@@ -6,6 +6,7 @@ import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -51,6 +52,18 @@ export function Sidebar({
   const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
+  const [user, setUser] = React.useState({ name: '', email: '' });
+
+  React.useEffect(() => {
+    fetch('/api/users/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.user) {
+          setUser({ name: data.user.name || '', email: data.user.email || '' })
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const { items: renderedGroups, handleDragEnd } = useDnDService({
     items: groups,
@@ -119,6 +132,7 @@ export function Sidebar({
 
       <SidebarFooter>
         <SidebarMenu>
+          <NavUser user={user} />
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link href="/settings" />} isActive={pathname === "/settings"}>
               <Settings className="size-4" />

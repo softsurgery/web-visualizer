@@ -1,7 +1,7 @@
 import React from "react";
 import type { Group, LayoutType } from "@/types";
 import { IframeCard } from "@/components/main/IframeCard";
-import { AddUrlCard } from "@/components/main/AddUrlCard";
+import { AddUrlCard, useAddUrlSheet } from "@/components/main/AddUrlCard";
 import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,11 @@ import { cn } from "@/lib/utils";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { SortableContext, rectSortingStrategy, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useDnDGridService, SortableItem } from "@/hooks/useDnDGridService";
 import { useTabName } from "@/hooks/useTabName";
 
@@ -17,7 +21,12 @@ interface MainViewProps {
   className?: string;
   activeGroup?: Group;
   onAddUrl?: (url: string, name: string, pointToCenter?: boolean) => void;
-  onEditUrl?: (index: number, url: string, name: string, pointToCenter?: boolean) => void;
+  onEditUrl?: (
+    index: number,
+    url: string,
+    name: string,
+    pointToCenter?: boolean,
+  ) => void;
   onDeleteUrl?: (index: number) => void;
   onChangeLayout?: (id: string, layout: LayoutType) => void;
 }
@@ -37,7 +46,7 @@ export function MainView({
   const onDeleteUrl = onDeleteUrlProp ?? visualizer.deleteUrl;
   const onChangeLayout = onChangeLayoutProp ?? visualizer.changeGroupLayout;
   const { setRoutes } = useBreadcrumb();
-  
+
   useTabName(activeGroup ? activeGroup.name : "Web Visualizer");
 
   React.useEffect(() => {
@@ -80,6 +89,11 @@ export function MainView({
     onReorder: handleReorder,
   });
 
+  const { SheetFragment: AddUrlSheet, openSheet: openAddUrlSheet } = useAddUrlSheet(
+    activeGroup?.name,
+    (url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc)
+  );
+
   if (!activeGroup) {
     return <EmptyGroupState />;
   }
@@ -104,9 +118,10 @@ export function MainView({
   };
 
   return (
-    <div className={cn("flex flex-col gap-4 w-full", className)}>
+    <div className={cn("flex flex-col gap-4 w-full flex-1 h-full", className)}>
+      {AddUrlSheet}
       {activeGroup.urls.length === 0 ? (
-        <EmptyUrlsState />
+        <EmptyUrlsState className="flex-1" onAddAction={openAddUrlSheet} />
       ) : (
         <>
           <div className="flex justify-end gap-1">
@@ -150,33 +165,51 @@ export function MainView({
           >
             <SortableContext
               items={itemIds}
-              strategy={layout === "list" ? verticalListSortingStrategy : rectSortingStrategy}
+              strategy={
+                layout === "list"
+                  ? verticalListSortingStrategy
+                  : rectSortingStrategy
+              }
             >
               <div className={getGridClass()}>
                 {stableUrls.map((entry) => {
                   const id = `${entry.url}-${entry.name}`;
-                  const logicalIndex = activeGroup.urls.findIndex(u => `${u.url}-${u.name}` === id);
+                  const logicalIndex = activeGroup.urls.findIndex(
+                    (u) => `${u.url}-${u.name}` === id,
+                  );
                   if (logicalIndex === -1) return null;
 
                   return (
-                  <SortableItem key={id} id={id} logicalIndex={logicalIndex} className={layout === "list" ? "h-125" : "h-full"}>
-                    {(dragHandleProps) => (
-                      <IframeCard
-                        url={entry.url}
-                        name={entry.name}
-                        pointToCenter={entry.pointToCenter}
-                        onDelete={() => onDeleteUrl(logicalIndex)}
-                        onEdit={(url, name, pointToCenter) => onEditUrl(logicalIndex, url, name, pointToCenter)}
-                        dragHandleProps={dragHandleProps}
-                      />
-                    )}
-                  </SortableItem>
+                    <SortableItem
+                      key={id}
+                      id={id}
+                      logicalIndex={logicalIndex}
+                      className={layout === "list" ? "h-125" : "h-full"}
+                    >
+                      {(dragHandleProps) => (
+                        <IframeCard
+                          url={entry.url}
+                          name={entry.name}
+                          pointToCenter={entry.pointToCenter}
+                          onDelete={() => onDeleteUrl(logicalIndex)}
+                          onEdit={(url, name, pointToCenter) =>
+                            onEditUrl(logicalIndex, url, name, pointToCenter)
+                          }
+                          dragHandleProps={dragHandleProps}
+                        />
+                      )}
+                    </SortableItem>
                   );
                 })}
-                <div className={layout === "list" ? "h-125" : "h-full"} style={{ order: 9999 }}>
+                <div
+                  className={layout === "list" ? "h-125" : "h-full"}
+                  style={{ order: 9999 }}
+                >
                   <AddUrlCard
                     groupName={activeGroup.name}
-                    onAddUrl={(url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc)}
+                    onAddUrl={(url, name, ptc) =>
+                      onAddUrl && onAddUrl(url, name, ptc)
+                    }
                   />
                 </div>
               </div>

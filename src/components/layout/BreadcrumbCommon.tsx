@@ -27,8 +27,8 @@ function Crumb({
   const title = <span className="block truncate">{route.title}</span>;
   const crumb =
     route.href && !isLast ? (
-      <BreadcrumbLink asChild>
-        <Link href={route.href}>{title}</Link>
+      <BreadcrumbLink render={<Link href={route.href} />}>
+        {title}
       </BreadcrumbLink>
     ) : (
       <BreadcrumbPage>{title}</BreadcrumbPage>
@@ -36,11 +36,8 @@ function Crumb({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="block min-w-0 max-w-full">{crumb}</span>
-      </TooltipTrigger>
+      <TooltipTrigger render={<span className="block min-w-0 max-w-full">{crumb}</span>} />
       <TooltipContent
-        hideArrow
         side="bottom"
         sideOffset={6}
         className="max-w-xs border border-border bg-background text-foreground"
@@ -87,16 +84,15 @@ function CollapsedTrail({ routes }: { routes: BreadcrumbRoute[] }) {
       <BreadcrumbSeparator className="shrink-0" />
       <BreadcrumbItem className="shrink-0">
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger render={
             <span
               tabIndex={0}
               className="inline-flex rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               <BreadcrumbEllipsis className="size-4" />
             </span>
-          </TooltipTrigger>
+          } />
           <TooltipContent
-            hideArrow
             side="bottom"
             sideOffset={6}
             className="max-w-xs border border-border bg-background text-foreground"
