@@ -135,9 +135,11 @@ export function Sidebar({
         <SidebarMenu>
           <NavUser user={user} />
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href="/settings" />} isActive={pathname === "/settings"}>
-              <Settings className="size-4" />
-              <span>Settings</span>
+            <SidebarMenuButton asChild isActive={pathname === "/settings"}>
+              <Link href="/settings">
+                <Settings className="size-4" />
+                <span>Settings</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
