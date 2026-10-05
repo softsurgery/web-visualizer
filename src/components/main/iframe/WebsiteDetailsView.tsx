@@ -6,6 +6,7 @@ import { useIntro } from "@/contexts/IntroContext";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { useTabName } from "@/hooks/useTabName";
+import { useWebsiteMetadataQuery } from "@/api";
 
 interface WebsiteScanData {
   title: string;
@@ -24,10 +25,6 @@ export function WebsiteDetailsView() {
   const { setRoutes } = useBreadcrumb();
   const { groups, activeGroup } = useVisualizer();
 
-  const [scanData, setScanData] = React.useState<WebsiteScanData | null>(null);
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [scanError, setScanError] = React.useState<string | null>(null);
-
   const nameParam = searchParams.get("name");
   const isProxiedParam = searchParams.get("isProxied") === "true";
 
@@ -35,6 +32,10 @@ export function WebsiteDetailsView() {
   const name = nameParam || "Website Details";
 
   useTabName(name);
+
+  const { data: rawScanData, isLoading: isScanning, error: queryError } = useWebsiteMetadataQuery(url);
+  const scanData: WebsiteScanData | null = rawScanData as any;
+  const scanError = queryError ? (queryError as Error).message : (rawScanData?.error || null);
 
   React.useEffect(() => {
     if (url) {
@@ -55,29 +56,6 @@ export function WebsiteDetailsView() {
     }
     return () => setIntro({});
   }, [url, name, groups, activeGroup, setIntro, setRoutes]);
-
-  React.useEffect(() => {
-    if (!url) return;
-
-    setIsScanning(true);
-    setScanError(null);
-
-    fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to scan website");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.error) throw new Error(data.error);
-        setScanData(data);
-      })
-      .catch((err) => {
-        setScanError(err.message);
-      })
-      .finally(() => {
-        setIsScanning(false);
-      });
-  }, [url]);
 
   if (!url) {
     return (

@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { create } from "zustand";
 import type { Group, LayoutType } from "@/types";
+import { groups as groupsApi } from "@/api/groups";
 let syncTimeout: NodeJS.Timeout | null = null;
 const syncGroupsToDB = async (groups: Group[]) => {
   if (typeof window === "undefined") return;
@@ -9,35 +10,28 @@ const syncGroupsToDB = async (groups: Group[]) => {
   
   syncTimeout = setTimeout(async () => {
     try {
-      const res = await fetch('/api/groups/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(groups)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.groups && Array.isArray(data.groups)) {
-          const currentGroups = useVisualizerStore.getState().groups;
-          let changed = false;
-          const mapped = currentGroups.map((cg) => {
-            const serverMatch = data.groups.find((sg: any) => sg.name === cg.name);
-            if (serverMatch && serverMatch.id !== cg.id) {
-              changed = true;
-              return { ...cg, id: serverMatch.id };
-            }
-            return cg;
-          });
-          if (changed) {
-            const currentActiveId = useVisualizerStore.getState().activeGroupId;
-            const updatedActive = mapped.find((g) => {
-              const prev = currentGroups.find((cg) => cg.id === currentActiveId);
-              return prev && prev.name === g.name;
-            });
-            useVisualizerStore.setState({
-              groups: mapped,
-              activeGroupId: updatedActive ? updatedActive.id : currentActiveId,
-            });
+      const data = await groupsApi.sync(groups);
+      if (data.groups && Array.isArray(data.groups)) {
+        const currentGroups = useVisualizerStore.getState().groups;
+        let changed = false;
+        const mapped = currentGroups.map((cg) => {
+          const serverMatch = data.groups.find((sg: any) => sg.name === cg.name);
+          if (serverMatch && serverMatch.id !== cg.id) {
+            changed = true;
+            return { ...cg, id: serverMatch.id };
           }
+          return cg;
+        });
+        if (changed) {
+          const currentActiveId = useVisualizerStore.getState().activeGroupId;
+          const updatedActive = mapped.find((g) => {
+            const prev = currentGroups.find((cg) => cg.id === currentActiveId);
+            return prev && prev.name === g.name;
+          });
+          useVisualizerStore.setState({
+            groups: mapped,
+            activeGroupId: updatedActive ? updatedActive.id : currentActiveId,
+          });
         }
       }
     } catch (e) {
@@ -72,57 +66,42 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
   initialize: async () => {
     if (get().isInitialized) return;
     try {
-      const res = await fetch("/api/groups?sort=order&limit=1000");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.docs && Array.isArray(data.docs) && data.docs.length > 0) {
-          const payloadGroups: Group[] = data.docs.map((doc: any) => ({
-            id: String(doc.id),
-            name: doc.name,
-            layout: doc.layout,
-            urls: (doc.urls || []).map((u: any) => ({
-              url: u.url,
-              name: u.name,
-              pointToCenter: u.pointToCenter,
-            })),
-          }));
-
-          // Deduplicate groups by name in case DB had duplicates
-          const seenNames = new Set<string>();
-          const uniqueGroups: Group[] = [];
-          let hadDuplicates = false;
-          for (const g of payloadGroups) {
-            if (seenNames.has(g.name)) {
-              hadDuplicates = true;
-            } else {
-              seenNames.add(g.name);
-              uniqueGroups.push(g);
+      const payloadGroups = await groupsApi.findAll({ sort: 'order', limit: 1000 });
+      if (payloadGroups && payloadGroups.length > 0) {
+        // Deduplicate groups by name in case DB had duplicates
+        const seenNames = new Set<string>();
+        const uniqueGroups: Group[] = [];
+        let hadDuplicates = false;
+        for (const g of payloadGroups) {
+          if (seenNames.has(g.name)) {
+            hadDuplicates = true;
+          } else {
+            seenNames.add(g.name);
+            uniqueGroups.push(g);
+          }
+        }
+        
+        let initialActiveId = uniqueGroups[0]?.id || null;
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const groupName = params.get("group");
+          if (groupName) {
+            const found = uniqueGroups.find((g) => g.name === groupName);
+            if (found) {
+              initialActiveId = found.id;
             }
           }
-          
-          let initialActiveId = uniqueGroups[0]?.id || null;
-          if (typeof window !== "undefined") {
-            const params = new URLSearchParams(window.location.search);
-            const groupName = params.get("group");
-            if (groupName) {
-              const found = uniqueGroups.find((g) => g.name === groupName);
-              if (found) {
-                initialActiveId = found.id;
-              }
-            }
-          }
+        }
 
-          set({ groups: uniqueGroups, activeGroupId: initialActiveId });
+        set({ groups: uniqueGroups, activeGroupId: initialActiveId });
 
-          if (hadDuplicates) {
-            syncGroupsToDB(uniqueGroups);
-          }
+        if (hadDuplicates) {
+          syncGroupsToDB(uniqueGroups);
         }
       }
     } catch {
       // Fetch failed
-    }
- finally {
+    } finally {
       set({ isInitialized: true });
     }
   },

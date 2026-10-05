@@ -3,6 +3,7 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import type { Group } from "@/types";
+import { groups as groupsApi } from "@/api/groups";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { useIntro } from "@/contexts/IntroContext";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
@@ -38,10 +39,7 @@ export function SettingsView({ groups: groupsProp, onImportGroups: onImportGroup
 
   const handleExport = async () => {
     try {
-      const res = await fetch("/api/groups?limit=1000");
-      if (!res.ok) throw new Error("Failed to fetch groups from database");
-      const data = await res.json();
-      
+      const data = await groupsApi.findPaginated({ limit: 1000 });
       let exportData = data.docs;
       if (!exportData) exportData = [];
 
@@ -76,17 +74,7 @@ export function SettingsView({ groups: groupsProp, onImportGroups: onImportGroup
               )
             }));
             
-            const res = await fetch('/api/groups/sync', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(migrated)
-            });
-
-            if (!res.ok) {
-              const err = await res.json();
-              throw new Error(err.error || "Database sync failed");
-            }
-
+            await groupsApi.sync(migrated);
             onImportGroups(migrated);
           } else {
             throw new Error("Invalid JSON format");

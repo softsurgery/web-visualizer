@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronsUpDownIcon, BadgeCheckIcon, BellIcon, LogOutIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { users } from "@/api/users"
 
 export function NavUser({
   user,
@@ -37,7 +38,7 @@ export function NavUser({
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/users/logout', { method: 'POST' })
+      await users.logout()
       router.push('/admin/login')
     } catch (error) {
       console.error('Logout failed:', error)

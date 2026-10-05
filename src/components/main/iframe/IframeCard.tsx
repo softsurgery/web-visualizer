@@ -9,6 +9,7 @@ import { cn } from "cn";
 import { FormBuilder } from "@/components/shared/form-builder/FormBuilder";
 import { useEditUrlFormStructure } from "./forms/useEditUrlFormStructure";
 import { useUrlStore } from "@/hooks/stores";
+import { useCheckFrameableQuery } from "@/api";
 
 interface IframeCardProps {
   className?: string;
@@ -41,28 +42,13 @@ export function IframeCard({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [scale, setScale] = React.useState(1);
-  const [useProxy, setUseProxy] = React.useState(false);
-  const [isChecking, setIsChecking] = React.useState(true);
+  const { data: frameableData, isLoading: isChecking, isError } = useCheckFrameableQuery(url);
+  const useProxy = isError ? true : (frameableData ? !frameableData.frameable : false);
 
   const urlStore = useUrlStore();
   const { editUrlFormStructure } = useEditUrlFormStructure({
     store: urlStore,
   });
-
-  React.useEffect(() => {
-    setIsChecking(true);
-    fetch(`/api/check-frameable?url=${encodeURIComponent(url)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setUseProxy(!data.frameable);
-      })
-      .catch(() => {
-        setUseProxy(true); // Default to proxy on error
-      })
-      .finally(() => {
-        setIsChecking(false);
-      });
-  }, [url]);
 
   React.useEffect(() => {
     const container = containerRef.current;

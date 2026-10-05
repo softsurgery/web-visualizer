@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import type { Group } from "@/types";
+import { useCurrentUserQuery } from "@/api";
 import { GroupItem } from "@/components/sidebar/GroupItem";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
@@ -53,18 +54,11 @@ export function Sidebar({
   const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
-  const [user, setUser] = React.useState({ name: '', email: '' });
-
-  React.useEffect(() => {
-    fetch('/api/users/me')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.user) {
-          setUser({ name: data.user.name || '', email: data.user.email || '' })
-        }
-      })
-      .catch(console.error)
-  }, [])
+  const { data: userData } = useCurrentUserQuery();
+  const user = {
+    name: userData?.user?.name || '',
+    email: userData?.user?.email || '',
+  };
 
   const { items: renderedGroups, handleDragEnd } = useDnDService({
     items: groups,
