@@ -20,8 +20,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, BadgeCheckIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { ChevronsUpDownIcon, BadgeCheckIcon, BellIcon, LogOutIcon, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { users } from "@/api/users"
 
 export function NavUser({
@@ -87,6 +88,12 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="cursor-pointer">
+                  <Settings className="mr-2 size-4" />
+                  Settings
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <BadgeCheckIcon className="mr-2 size-4" />
                 Account

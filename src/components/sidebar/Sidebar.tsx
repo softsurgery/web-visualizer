@@ -7,7 +7,7 @@ import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar as ShadcnSidebar,
@@ -143,20 +143,10 @@ export function Sidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          {isAuthenticated ? (
-            <>
-              <NavUser user={user} />
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/settings"}>
-                  <Link href="/settings">
-                    <Settings className="size-4" />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </>
-          ) : (
+        {isAuthenticated ? (
+          <NavUser user={user} />
+        ) : (
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/admin/login">
@@ -165,8 +155,8 @@ export function Sidebar({
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )}
-        </SidebarMenu>
+          </SidebarMenu>
+        )}
       </SidebarFooter>
     </ShadcnSidebar>
   );
