@@ -1,12 +1,11 @@
 import React from "react";
 import type { Group, LayoutType } from "@/types";
 import { IframeCard } from "@/components/main/iframe/IframeCard";
-import { AddUrlCard } from "@/components/main/iframe/forms/AddUrlCard";
 import {
   EmptyGroupState,
   EmptyUrlsState,
 } from "@/components/main/group/EmptyState";
-import { LayoutGrid, Grid3X3, Grid2X2, List, Edit2 } from "lucide-react";
+import { LayoutGrid, Grid3X3, Grid2X2, List, Edit2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -156,42 +155,52 @@ export function GroupView({
             <Edit2 size={16} />
           </Button>
         </div>
-        {activeGroup.urls.length > 0 && (
-          <div className="flex justify-end gap-1 shrink-0">
-            <Button
-              variant={layout === "sm" ? "default" : "outline"}
-              size="icon"
-              onClick={() => handleSetLayout("sm")}
-              title="Small Grid"
-            >
-              <Grid3X3 size={18} />
-            </Button>
-            <Button
-              variant={layout === "md" ? "default" : "outline"}
-              size="icon"
-              onClick={() => handleSetLayout("md")}
-              title="Medium Grid"
-            >
-              <Grid2X2 size={18} />
-            </Button>
-            <Button
-              variant={layout === "lg" ? "default" : "outline"}
-              size="icon"
-              onClick={() => handleSetLayout("lg")}
-              title="Large Grid"
-            >
-              <LayoutGrid size={18} />
-            </Button>
-            <Button
-              variant={layout === "list" ? "default" : "outline"}
-              size="icon"
-              onClick={() => handleSetLayout("list")}
-              title="List View"
-            >
-              <List size={18} />
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center justify-end gap-1 shrink-0">
+          {activeGroup.urls.length > 0 && (
+            <>
+              <Button
+                variant={layout === "sm" ? "default" : "outline"}
+                size="icon"
+                onClick={() => handleSetLayout("sm")}
+                title="Small Grid"
+              >
+                <Grid3X3 size={18} />
+              </Button>
+              <Button
+                variant={layout === "md" ? "default" : "outline"}
+                size="icon"
+                onClick={() => handleSetLayout("md")}
+                title="Medium Grid"
+              >
+                <Grid2X2 size={18} />
+              </Button>
+              <Button
+                variant={layout === "lg" ? "default" : "outline"}
+                size="icon"
+                onClick={() => handleSetLayout("lg")}
+                title="Large Grid"
+              >
+                <LayoutGrid size={18} />
+              </Button>
+              <Button
+                variant={layout === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => handleSetLayout("list")}
+                title="List View"
+              >
+                <List size={18} />
+              </Button>
+            </>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={openAddUrlSheet}
+            title="Add Website"
+          >
+            <Plus size={18} />
+          </Button>
+        </div>
       </div>
       {activeGroup.urls.length === 0 ? (
         <EmptyUrlsState className="flex-1" onAddAction={openAddUrlSheet} />
@@ -239,17 +248,6 @@ export function GroupView({
                   </SortableItem>
                 );
               })}
-              <div
-                className={layout === "list" ? "h-125" : "h-full"}
-                style={{ order: 9999 }}
-              >
-                <AddUrlCard
-                  groupName={activeGroup.name}
-                  onAddUrl={(url, name, ptc) =>
-                    onAddUrl && onAddUrl(url, name, ptc)
-                  }
-                />
-              </div>
             </div>
           </SortableContext>
         </DndContext>
