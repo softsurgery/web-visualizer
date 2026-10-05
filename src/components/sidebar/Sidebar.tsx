@@ -3,6 +3,7 @@ import React from "react";
 import type { Group } from "@/types";
 import { useCurrentUserQuery } from "@/api";
 import { GroupItem } from "@/components/sidebar/GroupItem";
+import { Spinner } from "@/components/shared/Spinner";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import Link from "next/link";
@@ -60,7 +61,7 @@ export function Sidebar({
   const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
-  const { data: userData } = useCurrentUserQuery();
+  const { data: userData, isPending: isUserPending } = useCurrentUserQuery();
   const isAuthenticated = Boolean(userData?.user);
   const isReadOnly = visualizer.isReadOnly || !isAuthenticated;
 
@@ -143,7 +144,11 @@ export function Sidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        {isAuthenticated ? (
+        {isUserPending ? (
+          <div className="flex justify-center p-4">
+            <Spinner size="small" />
+          </div>
+        ) : isAuthenticated ? (
           <NavUser user={user} />
         ) : (
           <SidebarMenu>

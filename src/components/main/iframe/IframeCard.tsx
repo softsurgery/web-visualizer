@@ -5,6 +5,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { DESKTOP_WIDTH } from "../constants";
 import { cn } from "cn";
+import { Spinner } from "@/components/shared/Spinner";
 import { useCheckFrameableQuery } from "@/api";
 import { useUpdateUrlSheet } from "./modals/useUpdateURLSheet";
 
@@ -45,7 +46,7 @@ export function IframeCard({
   const [scale, setScale] = React.useState(1);
   const {
     data: frameableData,
-    isLoading: isChecking,
+    isPending,
     isError,
   } = useCheckFrameableQuery(url);
   const useProxy = isError
@@ -67,7 +68,7 @@ export function IframeCard({
         setScale(Math.max(0.1, width / DESKTOP_WIDTH));
       }
 
-      if (pointToCenter && !isChecking && !useProxy) {
+      if (pointToCenter && !isPending && !useProxy) {
         setTimeout(() => {
           container.scrollTop =
             container.scrollHeight / 2 - container.clientHeight / 2;
@@ -77,7 +78,7 @@ export function IframeCard({
 
     observer.observe(container);
 
-    if (pointToCenter && !isChecking && !useProxy) {
+    if (pointToCenter && !isPending && !useProxy) {
       setTimeout(() => {
         container.scrollTop =
           container.scrollHeight / 2 - container.clientHeight / 2;
@@ -85,7 +86,7 @@ export function IframeCard({
     }
 
     return () => observer.disconnect();
-  }, [isChecking, pointToCenter, useProxy]);
+  }, [isPending, pointToCenter, useProxy]);
 
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete URL",
@@ -140,7 +141,7 @@ export function IframeCard({
             <div
               className={cn(
                 "w-2 h-2 rounded-full shrink-0",
-                isChecking
+                isPending
                   ? "bg-warning"
                   : useProxy
                     ? "bg-warning"
@@ -208,7 +209,7 @@ export function IframeCard({
         className="flex-1 relative bg-muted/20 overflow-y-auto overflow-x-hidden no-scrollbar"
         ref={containerRef}
       >
-        {!isChecking && (
+        {!isPending && (
           <div
             className="relative w-full cursor-pointer"
             style={{ height: 4000 * scale }}
@@ -284,11 +285,9 @@ export function IframeCard({
             )}
           </div>
         )}
-        {isChecking && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm text-muted-foreground animate-pulse">
-              Checking connection...
-            </span>
+        {isPending && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
+            <Spinner />
           </div>
         )}
       </div>

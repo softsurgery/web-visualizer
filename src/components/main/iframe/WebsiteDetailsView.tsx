@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/shared/Spinner";
 import { Button } from "@/components/ui/button";
 import { useIntro } from "@/contexts/IntroContext";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
@@ -33,7 +33,7 @@ export function WebsiteDetailsView() {
 
   useTabName(name);
 
-  const { data: rawScanData, isLoading: isScanning, error: queryError } = useWebsiteMetadataQuery(url);
+  const { data: rawScanData, isPending, error: queryError } = useWebsiteMetadataQuery(url);
   const scanData: WebsiteScanData | null = rawScanData as any;
   const scanError = queryError ? (queryError as Error).message : (rawScanData?.error || null);
 
@@ -56,6 +56,14 @@ export function WebsiteDetailsView() {
     }
     return () => setIntro({});
   }, [url, name, groups, activeGroup, setIntro, setRoutes]);
+
+  if (isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <Spinner size="large" />
+      </div>
+    );
+  }
 
   if (!url) {
     return (
@@ -106,9 +114,7 @@ export function WebsiteDetailsView() {
       <div className="p-6 border border-border rounded-lg bg-card text-card-foreground shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Website Scan Details</h3>
-          {isScanning && (
-            <Loader2 className="size-4 animate-spin text-muted-foreground" />
-          )}
+          {isPending && <Spinner size="small" />}
         </div>
 
         {scanError ? (
@@ -138,10 +144,12 @@ export function WebsiteDetailsView() {
               <span className="col-span-3">{scanData.server}</span>
             </div>
           </div>
-        ) : !isScanning ? (
+        ) : !isPending ? (
           <p className="text-sm text-muted-foreground">No data available.</p>
         ) : (
-          <p className="text-sm text-muted-foreground">Scanning...</p>
+          <div className="flex items-center justify-center p-4">
+            <Spinner />
+          </div>
         )}
       </div>
 

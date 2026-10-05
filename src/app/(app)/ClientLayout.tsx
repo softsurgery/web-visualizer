@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { usePathname } from "next/navigation";
 import { useVisualizer } from "@/hooks/useVisualizer";
+import { Spinner } from "@/components/shared/Spinner";
 
 interface LayoutProps {
   className?: string;
@@ -30,6 +31,14 @@ function LayoutShell({ className, children }: LayoutProps) {
     visualizer.isShared ||
     (typeof window !== "undefined" &&
       new URLSearchParams(window.location.search).get("shared") === "true");
+
+  if (!visualizer.isInitialized) {
+    return (
+      <div className="flex h-svh w-full items-center justify-center bg-background">
+        <Spinner size="large" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider
