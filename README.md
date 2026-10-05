@@ -1,44 +1,93 @@
 # Web Visualizer 🌐
 
-A modern, responsive multi-URL dashboard and website visualizer built with **Next.js**, **TypeScript**, **Tailwind CSS v4**, and **Payload CMS**. 
+[![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![Payload CMS](https://img.shields.io/badge/Payload%20CMS-3.90-black?style=flat&logo=payloadcms)](https://payloadcms.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=flat&logo=tailwindcss)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ed?style=flat&logo=docker)](https://www.docker.com/)
 
-Web Visualizer enables users to curate, organize, and monitor multiple web pages simultaneously across customizable grid layouts, complete with an intelligent reverse-proxy API to bypass restrictive iframe framing headers (`X-Frame-Options` and `CSP frame-ancestors`).
+A modern, responsive multi-URL dashboard and website visualizer built with **Next.js**, **TypeScript**, **Tailwind CSS v4**, and **Payload CMS**.
+
+Web Visualizer empowers teams and developers to curate, organize, monitor, and share collections of live web pages simultaneously across customizable grid layouts—featuring an intelligent reverse-proxy API that transparently bypasses restrictive iframe headers (`X-Frame-Options` and `CSP: frame-ancestors`).
 
 ---
 
 ## ✨ Features
 
-- 🗂️ **Workspace & Group Management**: Organize your web applications, dashboards, reference links, and tools into distinct groups.
-- 🔐 **User Authentication & Access Control**: Secure your dashboard with Payload CMS user authentication and group-level access controls.
-- 📐 **Adaptive Grid Layouts & Drag-and-Drop**: Switch dynamically between **Small**, **Medium**, **Large**, and **List** views according to your screen size and workflow needs. Seamlessly reorder iframe cards using drag-and-drop.
-- 🖥️ **Responsive Desktop Viewport Scaling**: Simulates full 1280px desktop viewports for embedded sites, smoothly auto-scaling down with `ResizeObserver` to fit any card dimension without horizontal breaking.
-- 🛡️ **Intelligent Frameability Detection & Proxy Fallback**:
-  - Checks target sites against `X-Frame-Options` and `Content-Security-Policy: frame-ancestors` via `/api/check-frameable`.
-  - Automatically routes blocked sites through a built-in Next.js proxy API (`/api/proxy`) that strips restrictive headers, enabling sites to render inside iframes seamlessly.
-  - Visual status pill indicators:
-    - 🟢 **Green**: Direct connection (natively frameable)
-    - 🟠 **Orange**: Proxied connection (bypassing frame restrictions)
-    - 🟡 **Yellow**: Checking frameability
-- 🔍 **Site Details & Metadata Inspector**:
-  - Detailed drill-down view (`/details/:urlId`) with expanded preview.
-  - Backend metadata scraper (`/api/metadata`) extracts page `<title>`, `<meta description>`, generator tags, and server headers.
-- 🔗 **State Synchronization**: Active group state syncs with URL query parameters, providing dynamic document titles for better browser navigation.
-- 🎯 **Point to Center**: Option to auto-scroll vertically to the center of taller web applications upon loading.
-- 🌓 **Theme Support**: Seamless Dark, Light, and System themes powered by `next-themes`.
-- ⚡ **Modern UI**: Built with Tailwind CSS v4, Lucide icons, and accessible component primitives.
+- 🗂️ **Workspace & Group Management**: Group websites, dashboards, and tools into organized workspaces with custom ordering.
+- 🔒 **Privacy & Access Control**: 
+  - Toggle groups between **Private** (authenticated users only) and **Public**.
+  - Automatically generates unique secure UUIDs for sharing public groups with stakeholders without exposing administration rights.
+- 🔗 **Public Shareable Links (`/share/:uuid`)**: Share complete group dashboards via lightweight, dedicated share routes with zero navigation chrome.
+- 🖥️ **Responsive Desktop Viewport Simulation**: Simulates full 1280px desktop viewports for embedded pages, auto-scaling down via `ResizeObserver` to fit any card dimension without horizontal overflow or mobile layout shifts.
+- 📐 **Adaptive Grid Layouts & Drag-and-Drop**:
+  - Switch between **Small** (high density), **Medium** (2x2), **Large** (single column focus), and **List** views.
+  - Seamlessly reorder iframe cards with smooth drag-and-drop interactions powered by `@dnd-kit`.
+- 🛡️ **Intelligent Header-Stripping Proxy Middleware**:
+  - Automatically tests URLs against `X-Frame-Options` and `Content-Security-Policy: frame-ancestors` via `/api/check-frameable`.
+  - Transparently falls back to `/api/proxy?url=...` to strip blocking headers and inject permissive CORS headers for sites that forbid framing.
+  - Real-time visual status pills:
+    - 🟢 **Green**: Direct connection (native iframe support)
+    - 🟠 **Orange**: Proxied connection (restrictions bypassed)
+    - 🟡 **Yellow**: Testing connection / evaluating frameability
+- 🔍 **Site Details & Live Metadata Inspector (`/details/:urlId`)**:
+  - Dedicated drill-down view with expanded viewport preview.
+  - Built-in metadata scraper (`/api/metadata`) extracts page `<title>`, `<meta name="description">`, generator tags, and server headers.
+- 🎯 **Point to Center**: Vertically centers iframe scroll positions automatically upon loading for applications with content focused in the mid-page.
+- ⚙️ **Centralized Settings Navigation**: Relocated settings page (`/settings`) accessible from the sidebar for managing themes, authentication sessions, and preferences.
+- 🌓 **Dynamic Theme Switching**: Seamless Dark, Light, and System themes powered by `next-themes`.
+- ⏳ **Global Loading Spinner**: Smooth initialization state transitions preventing UI flicker during client hydration and database sync.
+
+---
+
+## 🏗️ Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    User([User Browser])
+    Visualizer[Web Visualizer Frontend]
+    CheckAPI["/api/check-frameable"]
+    ProxyAPI["/api/proxy"]
+    MetaAPI["/api/metadata"]
+    Payload[Payload CMS Backend]
+    Postgres[(PostgreSQL Database)]
+    TargetWeb[External Web Page]
+
+    User -->|Views Dashboard / Share Link| Visualizer
+    Visualizer -->|1. Check Headers| CheckAPI
+    CheckAPI -->|HEAD / GET Request| TargetWeb
+
+    CheckAPI -->|Frameable = true| Visualizer
+    Visualizer -.->|Direct Embed| TargetWeb
+
+    CheckAPI -->|Frameable = false| Visualizer
+    Visualizer -->|2. Route through Proxy| ProxyAPI
+    ProxyAPI -->|Fetch & Strip Framing Headers| TargetWeb
+    ProxyAPI -->|Stream Body with Permissive Headers| Visualizer
+
+    Visualizer -->|Fetch Details| MetaAPI
+    MetaAPI -->|Extract Meta Tags| TargetWeb
+
+    Visualizer <-->|Sync State & Auth| Payload
+    Payload <-->|Store Groups, URLs & Users| Postgres
+```
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org/)
-- **CMS**: [Payload CMS](https://payloadcms.com/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Theming**: [next-themes](https://github.com/pacocoursey/next-themes)
-- **Drag and Drop**: [dnd-kit](https://dndkit.com/)
-- **Linter**: [Oxlint](https://oxc.rs/docs/guide/usage/linter)
+| Category | Technology |
+|---|---|
+| **Framework** | [Next.js](https://nextjs.org/) (App Router, Turbopack, Standalone Output) |
+| **Backend & CMS** | [Payload CMS v3](https://payloadcms.com/) with `@payloadcms/db-postgres` |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) with `@tailwindcss/postcss` |
+| **Component Primitives** | Radix UI / Shadcn UI primitives |
+| **Drag and Drop** | [dnd-kit](https://dndkit.com/) |
+| **State & Data Fetching** | Zustand, TanStack React Query v5 |
+| **Icons & Theming** | Lucide React, `next-themes` |
+| **Linting** | [Oxlint](https://oxc.rs/) |
+| **Containerization** | Docker, Docker Compose, Alpine Linux |
 
 ---
 
@@ -46,35 +95,46 @@ Web Visualizer enables users to curate, organize, and monitor multiple web pages
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18.0 or later recommended)
+- [Node.js](https://nodejs.org/) (v18.0 or v20/v22 recommended)
 - [Yarn](https://yarnpkg.com/) or `npm`
-- Postgres database (as configured in Payload CMS)
+- [PostgreSQL](https://www.postgresql.org/) (v14 or higher) or Docker
 
-### Installation
+### Local Installation
 
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
    git clone <repository-url>
    cd web-visualizer
    ```
 
-2. Install dependencies:
+2. **Install dependencies**:
    ```bash
    yarn install
    # or
    npm install
    ```
 
-3. Configure environment variables for Next.js and Payload CMS by duplicating `.env.example` or setting up a `.env` file.
-
-4. Start the development server:
+3. **Configure Environment Variables**:
+   Create a `.env` file from `.env.example`:
    ```bash
-   yarn dev
-   # or
-   npm run dev
+   cp .env.example .env
+   ```
+   Configure your database connection and secret key:
+   ```env
+   PAYLOAD_SECRET=your-secure-random-secret-key-at-least-32-chars
+   POSTGRES_URL=postgres://postgres:postgres@127.0.0.1:5432/web_visualizer
+   DATABASE_URI=postgres://postgres:postgres@127.0.0.1:5432/web_visualizer
+   PORT=3000
    ```
 
-5. Open your browser and navigate to the local address (typically `http://localhost:3000`).
+4. **Start the development server**:
+   ```bash
+   yarn dev
+   ```
+
+5. Access the application:
+   - **Dashboard**: [http://localhost:3000](http://localhost:3000)
+   - **Payload Admin**: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ---
 
@@ -82,44 +142,40 @@ Web Visualizer enables users to curate, organize, and monitor multiple web pages
 
 | Command | Description |
 |---|---|
-| `yarn dev` | Starts the Next.js development server with Payload CMS running. |
-| `yarn build` | Builds the Next.js application for production. |
-| `yarn start` | Starts the production server. |
-| `yarn lint` | Runs [Oxlint](https://oxc.rs/) for fast JavaScript/TypeScript linting. |
-| `yarn payload` | Payload CMS CLI. |
+| `yarn dev` | Runs the Next.js development server with hot-reload and Turbopack. |
+| `yarn build` | Builds the optimized production application with standalone output. |
+| `yarn start` | Starts the production server from compiled assets. |
+| `yarn lint` | Runs [Oxlint](https://oxc.rs/) for ultra-fast code verification. |
+| `yarn payload` | Executes Payload CMS CLI commands. |
 
 ---
 
-## 🐳 Docker Setup & Deployment
+## 🐳 Docker & Docker Compose Deployment
 
-Web Visualizer provides an optimized multi-stage `Dockerfile` and a ready-to-use `docker-compose.yml` configured for production performance with minimal image size via Next.js standalone output.
+The repository includes a production-grade multi-stage `Dockerfile` (leveraging Alpine Linux and Next.js standalone output for minimal image size) and a full-stack `docker-compose.yml`.
 
-### 1. Running with Docker Compose (Recommended)
+### Option A: Docker Compose (App + PostgreSQL)
 
-The easiest way to spin up Web Visualizer alongside a PostgreSQL 16 database is via Docker Compose:
+Run the entire stack with a single command:
 
 ```bash
-# Build and start all services (app + Postgres) in detached mode
+# Build and start services in the background
 docker compose up -d --build
 
-# View application logs
+# Inspect service logs
 docker compose logs -f app
 
-# Stop the containers
+# Tear down services
 docker compose down
 ```
 
-The application will be available at `http://localhost:3000` and the Payload CMS admin at `http://localhost:3000/admin`.
-
-### 2. Manual Docker Build & Run
-
-You can also build and run the Docker image independently:
+### Option B: Build and Run Standalone Docker Container
 
 ```bash
-# Build the production image
+# Build the Docker image
 docker build -t web-visualizer:latest .
 
-# Run the container
+# Run the container connecting to an external or host Postgres instance
 docker run -d \
   -p 3000:3000 \
   --name web-visualizer \
@@ -130,85 +186,146 @@ docker run -d \
 
 ---
 
-## 🚀 Automated Deployment to Docker Hub (CI/CD)
+## 🚢 Automated CI/CD: Push to Docker Hub
 
-An automated GitHub Actions workflow is set up at [`.github/workflows/docker-publish.yml`](file:///.github/workflows/docker-publish.yml) to automatically build and push multi-platform (`linux/amd64`, `linux/arm64`) images to Docker Hub.
+A production GitHub Actions workflow is provided at [`.github/workflows/docker-publish.yml`](file:///.github/workflows/docker-publish.yml).
 
-### Trigger Events
-- **Push to `main`**: Automatically builds and tags as `:latest` and branch name.
-- **Push to `develop`**: Builds and tags image as `:develop`.
-- **Git Tags (`v*.*.*`)**: Builds and tags semver versions (e.g. `:v1.0.0`, `:1.0`, `:1`).
-- **Pull Requests to `main`**: Runs a test build without pushing to verify Docker compilation.
-- **Manual Dispatch**: Triggerable from GitHub Actions tab with custom tag inputs.
+### Workflow Capabilities
+- **Multi-Platform Builds**: Automatically compiles `linux/amd64` and `linux/arm64` images via QEMU and Docker Buildx.
+- **Automated Triggers**:
+  - Pushes to `main` tag as `:latest` and branch name.
+  - Pushes to `develop` tag as `:develop`.
+  - Git Release Tags (`v*.*.*`) tag semver releases (`:1.0.0`, `:1.0`, `:1`).
+  - Pull Requests run a dry-run compile without publishing.
+  - **Manual Trigger** (`workflow_dispatch`) with custom tag parameter.
+- **GitHub Layer Caching**: Leverages GitHub Actions Cache (`type=gha`) for fast incremental builds.
 
-### Setting Up Docker Hub Credentials in GitHub
-To enable automatic publishing, configure the following secrets in your GitHub repository (**Settings > Secrets and variables > Actions > Secrets**):
+### Required GitHub Secrets
+In your GitHub repository, go to **Settings > Secrets and variables > Actions > Secrets** and add:
 
-1. `DOCKERHUB_USERNAME`: Your Docker Hub account username.
-2. `DOCKERHUB_TOKEN`: A Docker Hub Personal Access Token (generate at [Docker Hub Account Settings > Security > New Access Token](https://hub.docker.com/settings/security)).
-3. `DOCKERHUB_REPO` *(Optional)*: If you are pushing to an organization or custom repository path (defaults to `<DOCKERHUB_USERNAME>/web-visualizer`).
-
----
-
-## 🔍 How the Proxy Middleware Works
-
-Modern web applications often set HTTP headers such as:
-- `X-Frame-Options: DENY` or `SAMEORIGIN`
-- `Content-Security-Policy: frame-ancestors ...`
-
-These security headers prevent unauthorized third-party websites from framing content in iframes. 
-
-Web Visualizer solves this for local visualization via custom Next.js API routes:
-
-1. **`/api/check-frameable?url=<target>`**: Sends a `HEAD` / `GET` request to inspect headers and returns `{ frameable: boolean }`.
-2. **`/api/proxy?url=<target>`**: If a site is not frameable directly, requests route through this proxy API, which fetches the remote site, removes restrictive framing headers, injects permissive CORS headers, and streams the content back safely to the preview iframe.
-3. **`/api/metadata?url=<target>`**: Extracts document meta tags (title, description, generator) and server headers to provide insight in the Details view.
+| Secret | Description | Example |
+|---|---|---|
+| `DOCKERHUB_USERNAME` | Your Docker Hub account username or organization | `myusername` |
+| `DOCKERHUB_TOKEN` | Docker Hub Personal Access Token with write permissions | `dckr_pat_...` |
+| `DOCKERHUB_REPO` *(Optional)* | Custom image repository (defaults to `<DOCKERHUB_USERNAME>/web-visualizer`) | `myorg/web-visualizer` |
 
 ---
 
-## 📁 Project Structure
+## 📡 API Reference
+
+Web Visualizer exposes internal API endpoints for proxying, verification, and workspace state synchronization:
+
+### 1. Check Frameability
+`GET /api/check-frameable?url=<target_url>`
+- **Description**: Inspects HTTP response headers (`X-Frame-Options` and `Content-Security-Policy: frame-ancestors`) to determine if a website allows iframe embedding.
+- **Response**:
+  ```json
+  { "frameable": true }
+  ```
+
+### 2. Header-Stripping Proxy
+`GET /api/proxy?url=<target_url>`
+- **Description**: Reverse-proxies the target webpage, stripping restrictive framing headers (`x-frame-options`, `content-security-policy`, `strict-transport-security`) and injecting permissive CORS headers.
+- **Methods Supported**: `GET`, `POST`, `PUT`, `DELETE`
+
+### 3. Website Metadata Scraper
+`GET /api/metadata?url=<target_url>`
+- **Description**: Scrapes metadata from target webpage HTML to populate the Details Inspector view.
+- **Response**:
+  ```json
+  {
+    "title": "Example Domain",
+    "description": "Domain for use in illustrative examples in documents",
+    "generator": "WordPress 6.4",
+    "server": "cloudflare"
+  }
+  ```
+
+### 4. Group Synchronization
+`POST /api/groups/sync`
+- **Description**: Synchronizes groups, ordering, layout preference, and URL configurations for the authenticated user with the Payload database.
+- **Auth**: Requires valid Payload session / JWT header.
+
+### 5. Public Share Group
+`GET /api/groups/share/:uuid`
+- **Description**: Fetches public group data by UUID or name without requiring user authentication. Returns 404 if the group is set to private.
+
+---
+
+## ⚙️ Environment Variables Reference
+
+| Variable | Required | Default | Description |
+|---|:---:|---|---|
+| `PAYLOAD_SECRET` | **Yes** | — | Strong secret string used to sign auth tokens and encrypt Payload CMS data. |
+| `DATABASE_URI` | **Yes** | — | PostgreSQL connection string (`postgres://user:pass@host:port/dbname`). |
+| `POSTGRES_URL` | No | Fallback to `DATABASE_URI` | Alternative environment variable for Postgres connection string. |
+| `PORT` | No | `3000` | Port on which the application server listens. |
+| `NODE_ENV` | No | `development` | Node environment (`development` or `production`). |
+| `NEXT_TELEMETRY_DISABLED` | No | `1` | Disables anonymous Next.js telemetry collection. |
+
+---
+
+## 📁 Directory Structure
 
 ```text
 web-visualizer/
-├── public/                 # Static assets
+├── .github/
+│   └── workflows/
+│       └── docker-publish.yml   # Multi-arch Docker Hub automated CI/CD
+├── public/                      # Static assets & brand icons
 ├── src/
-│   ├── app/                # Next.js App Router definitions & API routes
-│   │   ├── (app)/          # Frontend pages and layout
-│   │   ├── (payload)/      # Payload CMS admin interface
-│   │   └── api/            # API endpoints (proxy, metadata, check-frameable, groups/sync)
-│   ├── components/         # React components (layout, main, sidebar, ui)
-│   ├── contexts/           # React Context providers
-│   ├── hooks/              # Custom React hooks (dnd-kit, UI state)
-│   ├── payload/            # Payload CMS configuration and collections
-│   │   └── collections/    # Data models (Groups, Users, etc.)
-│   ├── types.ts            # Data models and TS types
-│   └── index.css           # Global Tailwind CSS styles and theme variables
-├── payload.config.ts       # Payload CMS core configuration
-├── next.config.mjs         # Next.js build config
-└── package.json            # Scripts and project dependencies
+│   ├── app/                     # Next.js App Router
+│   │   ├── (app)/               # Application views
+│   │   │   ├── details/[urlId]/ # Website metadata and inspector view
+│   │   │   ├── settings/        # Centralized settings & account view
+│   │   │   ├── share/[uuid]/    # Public shareable clean group view
+│   │   │   ├── layout.tsx       # Root layout
+│   │   │   ├── ClientLayout.tsx # Global responsive shell & provider wiring
+│   │   │   └── page.tsx         # Main dashboard view
+│   │   ├── (payload)/           # Payload CMS admin routes (/admin)
+│   │   └── api/                 # API endpoints
+│   │       ├── check-frameable/ # Frameability evaluator
+│   │       ├── groups/          # Group sync & public share APIs
+│   │       ├── metadata/        # Meta tag extractor
+│   │       └── proxy/           # CORS & frame header stripper proxy
+│   ├── components/              # Modular UI components
+│   │   ├── layout/              # Sidebar, Header, Footer
+│   │   ├── main/                # Iframe cards, Group views, Grid controls
+│   │   ├── settings/            # Settings view
+│   │   ├── shared/              # Reusable spinners & dialogs
+│   │   └── ui/                  # Radix UI primitives & custom inputs
+│   ├── contexts/                # React context providers (UI, Intro, Footer)
+│   ├── hooks/                   # Custom hooks (dnd-kit reordering, visualizer store)
+│   ├── payload/                 # Payload configuration & schema collections
+│   │   └── collections/         # Users and Groups collection schemas
+│   ├── types.ts                 # Shared TypeScript models
+│   └── index.css                # Tailwind CSS v4 variables & styles
+├── Dockerfile                   # Multi-stage production container image
+├── docker-compose.yml           # Local & production compose stack
+├── next.config.mjs              # Next.js config with standalone output
+├── payload.config.ts            # Payload CMS configuration
+└── package.json                 # Dependencies and scripts
 ```
 
 ---
 
-## 💡 Usage
+## 💡 Usage Guide
 
-### Creating Groups & Adding URLs
-1. Click **+ Add Group** in the left sidebar to create a new category (e.g., "Monitoring", "Design System", "Daily Feeds").
-2. Select the group, then click **Add URL** in the top header.
-3. Provide a friendly name and the destination URL.
-4. Optionally toggle **Point to Center** if the page has essential content in the middle.
+### 1. Creating Groups & Adding URLs
+- Click **+ Add Group** in the left sidebar to create categories (e.g. *Monitoring*, *Design Systems*, *Production APIs*).
+- Click **Add URL** in the header to add site links with custom titles.
+- Toggle **Point to Center** if the target page has critical content located in the center.
 
-### Switching Layouts & Reordering
-Use the layout icons in the top-right corner to toggle between:
-- **Small Grid** (`3x3` / `4x4`): High-density bird's-eye overview.
-- **Medium Grid** (`2x2`): Balanced view for active inspection.
-- **Large Grid** (`1 column`): Expanded view for detailed reading.
-- **List View**: Vertical stack layout.
+### 2. Privacy & Sharing Dashboards
+- In group settings, toggle **Public** to make the dashboard accessible to team members.
+- Copy the public share link (`/share/<uuid>`). Anyone with the link can view live pages with zero UI clutter.
 
-You can drag and drop cards to reorder them in any grid view!
+### 3. Layout Switching & Reordering
+- Use the layout switcher in the top right to switch between **Small Grid** (`3x3`), **Medium Grid** (`2x2`), **Large Focus** (`1 col`), or **List View**.
+- Drag and drop cards by their drag handles to customize order; changes persist automatically.
 
-### Inspecting Sites
-Click anywhere on an iframe card to navigate to its **Website Details** view, where you can see extracted meta tags, headers, and an expanded viewport.
+### 4. Inspecting Sites
+- Click on an iframe card to open the **Website Details** view, displaying response headers, meta descriptions, generators, and an expanded viewport preview.
 
 ---
 

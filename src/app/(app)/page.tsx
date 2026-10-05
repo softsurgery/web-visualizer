@@ -4,6 +4,8 @@ import configPromise from "@payload-config";
 import { redirect } from "next/navigation";
 import { GroupView } from "@/components/main/group/GroupView";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage({
   searchParams,
 }: {

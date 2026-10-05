@@ -8,7 +8,9 @@ WORKDIR /app
 # 2. Dependencies stage
 FROM base AS deps
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --network-timeout 100000
+RUN yarn config set network-timeout 300000 && \
+    yarn config set network-concurrency 4 && \
+    yarn install --frozen-lockfile
 
 # 3. Builder stage
 FROM base AS builder
@@ -19,8 +21,6 @@ COPY . .
 # Set environment variables for build
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PAYLOAD_SECRET=build_time_temp_secret_key_123456789
-ENV DATABASE_URI=postgres://dummy:dummy@127.0.0.1:5432/dummy
 
 RUN yarn build
 
