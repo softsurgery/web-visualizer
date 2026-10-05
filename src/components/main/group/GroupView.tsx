@@ -1,10 +1,7 @@
 import React from "react";
 import type { Group, LayoutType } from "@/types";
 import { IframeCard } from "@/components/main/iframe/IframeCard";
-import {
-  AddUrlCard,
-  useAddUrlSheet,
-} from "@/components/main/iframe/forms/AddUrlCard";
+import { AddUrlCard } from "@/components/main/iframe/forms/AddUrlCard";
 import {
   EmptyGroupState,
   EmptyUrlsState,
@@ -22,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDnDGridService, SortableItem } from "@/hooks/useDnDGridService";
 import { useTabName } from "@/hooks/useTabName";
+import { useCreateUrlSheet } from "../iframe/modals/useCreateURLSheet";
 
 interface GroupViewProps {
   className?: string;
@@ -96,10 +94,10 @@ export function GroupView({
   });
 
   const { SheetFragment: AddUrlSheet, openSheet: openAddUrlSheet } =
-    useAddUrlSheet(
-      activeGroup?.name,
-      (url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc),
-    );
+    useCreateUrlSheet({
+      groupName: activeGroup?.name,
+      onAddUrl: (url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc),
+    });
 
   if (!activeGroup) {
     return <EmptyGroupState />;
