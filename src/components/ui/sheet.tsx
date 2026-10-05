@@ -72,8 +72,9 @@ function SheetContent({
           <SheetPrimitive.Close data-slot="sheet-close" asChild>
             <Button
               variant="ghost"
-              className="absolute top-3 right-3"
+              className="absolute top-3 right-3 z-10"
               size="icon-sm"
+              onClick={(event) => event.stopPropagation()}
             >
               <XIcon />
               <span className="sr-only">Close</span>

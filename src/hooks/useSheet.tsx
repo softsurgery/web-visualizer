@@ -43,9 +43,7 @@ export function useSheet({
     <Sheet
       open={isOpen}
       onOpenChange={(open) => {
-        console.log("Sheet opened:", open);
         setIsOpen(open);
-
         if (!open) {
           onToggle?.();
         }
