@@ -4,10 +4,10 @@ import { useFooter } from "@/contexts/FooterContext";
 import { useIntro } from "@/contexts/IntroContext";
 import { useUI } from "@/contexts/UIContext";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { cn } from "@/lib/utils";
+import { Header } from "./Header";
 
 interface LayoutProps {
   className?: string;
