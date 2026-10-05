@@ -56,7 +56,7 @@ export function useSheet({
       >
         {(title || description) && (
           <SheetHeader className={headerClassName}>
-            {title && <SheetTitle>{title}</SheetTitle>}
+            {title && <SheetTitle className="font-bold">{title}</SheetTitle>}
             {description && <SheetDescription>{description}</SheetDescription>}
           </SheetHeader>
         )}
