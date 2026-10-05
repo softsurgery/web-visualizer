@@ -1,15 +1,12 @@
 import { X, Edit2, GripVertical } from "lucide-react";
 import { useDialog } from "@/hooks/useDialog";
-import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { DESKTOP_WIDTH } from "../constants";
 import { cn } from "cn";
-import { FormBuilder } from "@/components/shared/form-builder/FormBuilder";
-import { useEditUrlFormStructure } from "./forms/useEditUrlFormStructure";
-import { useUrlStore } from "@/hooks/stores";
 import { useCheckFrameableQuery } from "@/api";
+import { useUpdateUrlSheet } from "./modals/useUpdateURLSheet";
 
 interface IframeCardProps {
   className?: string;
@@ -53,10 +50,7 @@ export function IframeCard({
       ? !frameableData.frameable
       : false;
 
-  const urlStore = useUrlStore();
-  const { editUrlFormStructure } = useEditUrlFormStructure({
-    store: urlStore,
-  });
+
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -111,49 +105,11 @@ export function IframeCard({
   });
 
   const { SheetFragment: EditSheetFragment, openSheet: openEditSheet } =
-    useSheet({
-      title: "Edit URL",
-      description: "Update the details for this URL.",
-      side: "right",
-      className: "min-w-[33vw] px-4",
-      headerClassName: "px-0",
-      children: (_isOpen, close) => (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const {
-              name: updatedName,
-              url: updatedUrl,
-              pointToCenter: updatedPtc,
-            } = urlStore.updateDto;
-            onEdit(updatedUrl, updatedName, Boolean(updatedPtc));
-            close();
-          }}
-          className="flex flex-col flex-1 gap-4 pb-4"
-        >
-          <FormBuilder structure={editUrlFormStructure} />
-          <div className="flex justify-end gap-2 mt-auto">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                urlStore.set("updateDto", {
-                  name,
-                  url,
-                  pointToCenter: Boolean(pointToCenter),
-                });
-                urlStore.set("updateDtoErrors", {});
-              }}
-              className="w-fit"
-            >
-              Reset
-            </Button>
-            <Button type="submit" className="w-fit">
-              Save
-            </Button>
-          </div>
-        </form>
-      ),
+    useUpdateUrlSheet({
+      url,
+      name,
+      pointToCenter,
+      onEdit,
     });
 
   const handleCardClick = () => {
@@ -218,12 +174,6 @@ export function IframeCard({
             size="icon"
             onClick={(e) => {
               e.stopPropagation();
-              urlStore.set("updateDto", {
-                name,
-                url,
-                pointToCenter: pointToCenter || false,
-              });
-              urlStore.set("updateDtoErrors", {});
               openEditSheet();
             }}
             className="text-muted-foreground hover:text-foreground h-8 w-8 transition"

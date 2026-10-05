@@ -1,37 +1,39 @@
 import React from "react";
 import { FormBuilder } from "@/components/shared/form-builder/FormBuilder";
 import { Button } from "@/components/ui/button";
-import { useUrlStore } from "@/hooks/stores";
+import { useGroupStore } from "@/hooks/stores";
 import { useSheet } from "@/hooks/useSheet";
-import { useEditUrlFormStructure } from "../forms/useEditUrlFormStructure";
+import { useEditGroupFormStructure } from "../forms/useEditGroupFormStructure";
 import { cn } from "cn";
+import type { Group } from "@/types";
 
-interface UseUpdateURLSheetProps {
+interface UseUpdateGroupSheetProps {
   className?: string;
-  url: string;
-  name: string;
-  pointToCenter?: boolean;
-  onEdit: (url: string, name: string, pointToCenter: boolean) => void;
+  group?: Group;
+  groupId?: string;
+  initialName?: string;
+  onEditGroup: (id: string, name: string) => void;
 }
 
-export const useUpdateUrlSheet = ({
+export const useUpdateGroupSheet = ({
   className,
-  url,
-  name,
-  pointToCenter,
-  onEdit,
-}: UseUpdateURLSheetProps) => {
-  const store = useUrlStore();
-  const { editUrlFormStructure } = useEditUrlFormStructure({ store });
+  group,
+  groupId: groupIdProp,
+  initialName: initialNameProp,
+  onEditGroup,
+}: UseUpdateGroupSheetProps) => {
+  const store = useGroupStore();
+  const { editGroupFormStructure } = useEditGroupFormStructure({ store });
+
+  const id = groupIdProp ?? group?.id ?? "";
+  const name = initialNameProp ?? group?.name ?? "";
 
   const handleReset = React.useCallback(() => {
     store.set("updateDto", {
       name,
-      url,
-      pointToCenter: Boolean(pointToCenter),
     });
     store.set("updateDtoErrors", {});
-  }, [name, url, pointToCenter, store]);
+  }, [name, store]);
 
   const handleOpen = () => {
     handleReset();
@@ -40,29 +42,17 @@ export const useUpdateUrlSheet = ({
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    const {
-      name: updatedName,
-      url: updatedUrl,
-      pointToCenter: updatedPtc,
-    } = store.updateDto;
-    if (!updatedName.trim() || !updatedUrl.trim()) return;
+    const updatedName = store.updateDto.name.trim();
+    if (!updatedName || !id) return;
 
-    let urlToUpdate = updatedUrl.trim();
-    if (
-      !urlToUpdate.startsWith("http://") &&
-      !urlToUpdate.startsWith("https://")
-    ) {
-      urlToUpdate = "https://" + urlToUpdate;
-    }
-
-    onEdit(urlToUpdate, updatedName.trim(), Boolean(updatedPtc));
+    onEditGroup(id, updatedName);
     store.resetUpdate();
     closeSheet();
   };
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
-    title: "Edit URL",
-    description: "Update the details for this URL.",
+    title: "Edit Group",
+    description: "Update the group name.",
     side: "right",
     className: "min-w-[33vw] px-4",
     headerClassName: "px-0",
@@ -71,7 +61,7 @@ export const useUpdateUrlSheet = ({
         onSubmit={handleUpdate}
         className={cn("flex flex-col flex-1 gap-4 pb-4", className)}
       >
-        <FormBuilder structure={editUrlFormStructure} />
+        <FormBuilder structure={editGroupFormStructure} />
         <div className="flex justify-end gap-2 mt-auto">
           <Button
             type="button"
@@ -83,9 +73,7 @@ export const useUpdateUrlSheet = ({
           </Button>
           <Button
             type="submit"
-            disabled={
-              !store.updateDto.url.trim() || !store.updateDto.name.trim()
-            }
+            disabled={!store.updateDto.name.trim()}
             className="w-fit"
           >
             Save
@@ -101,5 +89,3 @@ export const useUpdateUrlSheet = ({
     closeSheet,
   };
 };
-
-export const useUpdateURLSheet = useUpdateUrlSheet;

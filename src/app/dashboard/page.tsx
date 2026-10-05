@@ -1,3 +1,6 @@
+"use client";
+
+import { AppProviders } from "@/components/providers/AppProviders"
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import {
   Breadcrumb,
@@ -16,8 +19,9 @@ import {
 
 export default function Page() {
   return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
+    <AppProviders>
+      <SidebarProvider>
+        <AppSidebar variant="inset" />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
@@ -51,5 +55,6 @@ export default function Page() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+  </AppProviders>
   )
 }

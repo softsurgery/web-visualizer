@@ -29,6 +29,10 @@ export interface CreateGroupDto {
   name: string;
 }
 
+export interface UpdateGroupDto {
+  name: string;
+}
+
 export interface QueryParams {
   page?: string | number;
   limit?: string | number;

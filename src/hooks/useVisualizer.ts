@@ -15,7 +15,9 @@ const syncGroupsToDB = async (groups: Group[]) => {
         const currentGroups = useVisualizerStore.getState().groups;
         let changed = false;
         const mapped = currentGroups.map((cg) => {
-          const serverMatch = data.groups.find((sg: any) => sg.name === cg.name);
+          const serverMatch =
+            data.groups.find((sg: any) => String(sg.id) === String(cg.id)) ||
+            data.groups.find((sg: any) => sg.name === cg.name);
           if (serverMatch && serverMatch.id !== cg.id) {
             changed = true;
             return { ...cg, id: serverMatch.id };
@@ -46,6 +48,7 @@ interface VisualizerStore {
   activeGroupId: string | null;
   isInitialized: boolean;
   addGroup: (name: string) => void;
+  editGroup: (id: string, name: string) => void;
   deleteGroup: (id: string) => void;
   setActiveGroupId: (id: string | null) => void;
   addUrl: (url: string, name: string, pointToCenter?: boolean) => void;
@@ -111,6 +114,13 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
     const { groups, isInitialized } = get();
     const newGroups = [...groups, newGroup];
     set({ groups: newGroups, activeGroupId: newGroup.id });
+    if (isInitialized) syncGroupsToDB(newGroups);
+  },
+
+  editGroup: (id: string, name: string) => {
+    const { groups, isInitialized } = get();
+    const newGroups = groups.map((g) => (g.id === id ? { ...g, name } : g));
+    set({ groups: newGroups });
     if (isInitialized) syncGroupsToDB(newGroups);
   },
 

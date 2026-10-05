@@ -6,9 +6,10 @@ import {
   EmptyGroupState,
   EmptyUrlsState,
 } from "@/components/main/group/EmptyState";
-import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
+import { LayoutGrid, Grid3X3, Grid2X2, List, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { DndContext, closestCenter } from "@dnd-kit/core";
@@ -20,6 +21,7 @@ import {
 import { useDnDGridService, SortableItem } from "@/hooks/useDnDGridService";
 import { useTabName } from "@/hooks/useTabName";
 import { useCreateUrlSheet } from "../iframe/modals/useCreateURLSheet";
+import { useUpdateGroupSheet } from "./modals/useUpdateGroupSheet";
 
 interface GroupViewProps {
   className?: string;
@@ -33,6 +35,7 @@ interface GroupViewProps {
   ) => void;
   onDeleteUrl?: (index: number) => void;
   onChangeLayout?: (id: string, layout: LayoutType) => void;
+  onEditGroup?: (id: string, name: string) => void;
 }
 
 export function GroupView({
@@ -42,13 +45,16 @@ export function GroupView({
   onEditUrl: onEditUrlProp,
   onDeleteUrl: onDeleteUrlProp,
   onChangeLayout: onChangeLayoutProp,
+  onEditGroup: onEditGroupProp,
 }: GroupViewProps) {
+  const router = useRouter();
   const visualizer = useVisualizer();
   const activeGroup = activeGroupProp ?? visualizer.activeGroup;
   const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
   const onEditUrl = onEditUrlProp ?? visualizer.editUrl;
   const onDeleteUrl = onDeleteUrlProp ?? visualizer.deleteUrl;
   const onChangeLayout = onChangeLayoutProp ?? visualizer.changeGroupLayout;
+  const onEditGroup = onEditGroupProp ?? visualizer.editGroup;
   const { setRoutes } = useBreadcrumb();
 
   useTabName(activeGroup ? activeGroup.name : "Web Visualizer");
@@ -99,6 +105,15 @@ export function GroupView({
       onAddUrl: (url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc),
     });
 
+  const { SheetFragment: EditGroupSheet, openSheet: openEditGroupSheet } =
+    useUpdateGroupSheet({
+      group: activeGroup,
+      onEditGroup: (id, name) => {
+        onEditGroup?.(id, name);
+        router.push(`/?group=${encodeURIComponent(name)}`);
+      },
+    });
+
   if (!activeGroup) {
     return <EmptyGroupState />;
   }
@@ -125,11 +140,24 @@ export function GroupView({
   return (
     <div className={cn("flex flex-col gap-4 w-full flex-1 h-full", className)}>
       {AddUrlSheet}
-      {activeGroup.urls.length === 0 ? (
-        <EmptyUrlsState className="flex-1" onAddAction={openAddUrlSheet} />
-      ) : (
-        <>
-          <div className="flex justify-end gap-1">
+      {EditGroupSheet}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2 min-w-0">
+          <h2 className="text-xl font-bold tracking-tight text-foreground truncate">
+            {activeGroup.name}
+          </h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openEditGroupSheet}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+            title="Edit Group"
+          >
+            <Edit2 size={16} />
+          </Button>
+        </div>
+        {activeGroup.urls.length > 0 && (
+          <div className="flex justify-end gap-1 shrink-0">
             <Button
               variant={layout === "sm" ? "default" : "outline"}
               size="icon"
@@ -163,64 +191,68 @@ export function GroupView({
               <List size={18} />
             </Button>
           </div>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+        )}
+      </div>
+      {activeGroup.urls.length === 0 ? (
+        <EmptyUrlsState className="flex-1" onAddAction={openAddUrlSheet} />
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={itemIds}
+            strategy={
+              layout === "list"
+                ? verticalListSortingStrategy
+                : rectSortingStrategy
+            }
           >
-            <SortableContext
-              items={itemIds}
-              strategy={
-                layout === "list"
-                  ? verticalListSortingStrategy
-                  : rectSortingStrategy
-              }
-            >
-              <div className={getGridClass()}>
-                {stableUrls.map((entry) => {
-                  const id = `${entry.url}-${entry.name}`;
-                  const logicalIndex = activeGroup.urls.findIndex(
-                    (u) => `${u.url}-${u.name}` === id,
-                  );
-                  if (logicalIndex === -1) return null;
+            <div className={getGridClass()}>
+              {stableUrls.map((entry) => {
+                const id = `${entry.url}-${entry.name}`;
+                const logicalIndex = activeGroup.urls.findIndex(
+                  (u) => `${u.url}-${u.name}` === id,
+                );
+                if (logicalIndex === -1) return null;
 
-                  return (
-                    <SortableItem
-                      key={id}
-                      id={id}
-                      logicalIndex={logicalIndex}
-                      className={layout === "list" ? "h-125" : "h-full"}
-                    >
-                      {(dragHandleProps) => (
-                        <IframeCard
-                          url={entry.url}
-                          name={entry.name}
-                          pointToCenter={entry.pointToCenter}
-                          onDelete={() => onDeleteUrl(logicalIndex)}
-                          onEdit={(url, name, pointToCenter) =>
-                            onEditUrl(logicalIndex, url, name, pointToCenter)
-                          }
-                          dragHandleProps={dragHandleProps}
-                        />
-                      )}
-                    </SortableItem>
-                  );
-                })}
-                <div
-                  className={layout === "list" ? "h-125" : "h-full"}
-                  style={{ order: 9999 }}
-                >
-                  <AddUrlCard
-                    groupName={activeGroup.name}
-                    onAddUrl={(url, name, ptc) =>
-                      onAddUrl && onAddUrl(url, name, ptc)
-                    }
-                  />
-                </div>
+                return (
+                  <SortableItem
+                    key={id}
+                    id={id}
+                    logicalIndex={logicalIndex}
+                    className={layout === "list" ? "h-125" : "h-full"}
+                  >
+                    {(dragHandleProps) => (
+                      <IframeCard
+                        url={entry.url}
+                        name={entry.name}
+                        pointToCenter={entry.pointToCenter}
+                        onDelete={() => onDeleteUrl(logicalIndex)}
+                        onEdit={(url, name, pointToCenter) =>
+                          onEditUrl(logicalIndex, url, name, pointToCenter)
+                        }
+                        dragHandleProps={dragHandleProps}
+                      />
+                    )}
+                  </SortableItem>
+                );
+              })}
+              <div
+                className={layout === "list" ? "h-125" : "h-full"}
+                style={{ order: 9999 }}
+              >
+                <AddUrlCard
+                  groupName={activeGroup.name}
+                  onAddUrl={(url, name, ptc) =>
+                    onAddUrl && onAddUrl(url, name, ptc)
+                  }
+                />
               </div>
-            </SortableContext>
-          </DndContext>
-        </>
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );

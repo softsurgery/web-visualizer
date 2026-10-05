@@ -34,6 +34,7 @@ interface SidebarProps {
   activeGroupId?: string | null;
   onAddGroup?: (name: string) => void;
   onDeleteGroup?: (id: string, e: React.MouseEvent) => void;
+  onEditGroup?: (id: string, name: string) => void;
   onSetActiveGroup?: (id: string) => void;
 }
 
@@ -44,6 +45,7 @@ export function Sidebar({
   activeGroupId: activeGroupIdProp,
   onAddGroup: onAddGroupProp,
   onDeleteGroup: onDeleteGroupProp,
+  onEditGroup: onEditGroupProp,
   onSetActiveGroup: onSetActiveGroupProp,
 }: SidebarProps = {}) {
   const visualizer = useVisualizer();
@@ -51,6 +53,7 @@ export function Sidebar({
   const activeGroupId = activeGroupIdProp ?? visualizer.activeGroupId;
   const onAddGroup = onAddGroupProp ?? visualizer.addGroup;
   const onDeleteGroup = onDeleteGroupProp ?? visualizer.deleteGroup;
+  const onEditGroup = onEditGroupProp ?? visualizer.editGroup;
   const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
@@ -71,6 +74,7 @@ export function Sidebar({
         isActive={activeGroupId === group.id && pathname === "/"}
         onSelect={onSetActiveGroup}
         onDelete={onDeleteGroup}
+        onEdit={onEditGroup}
       />
     ),
   });

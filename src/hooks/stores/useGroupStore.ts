@@ -1,23 +1,31 @@
 import { create } from "zustand";
-import { CreateGroupDto } from "@/types";
+import { CreateGroupDto, UpdateGroupDto } from "@/types";
 import { setDeepValue } from "@/lib/object";
 
 interface GroupStoreData {
   createDto: CreateGroupDto;
+  updateDto: UpdateGroupDto;
   createDtoErrors: Record<string, string[]>;
+  updateDtoErrors: Record<string, string[]>;
 }
 
 const initialState: GroupStoreData = {
   createDto: {
     name: "",
   },
+  updateDto: {
+    name: "",
+  },
   createDtoErrors: {},
+  updateDtoErrors: {},
 };
 
 export interface GroupStore extends GroupStoreData {
   set: <T>(name: keyof GroupStoreData, value: T) => void;
   setNested: <T>(path: string, value: T) => void;
   reset: () => void;
+  resetCreate: () => void;
+  resetUpdate: () => void;
 }
 
 export const useGroupStore = create<GroupStore>((set) => ({
@@ -45,5 +53,17 @@ export const useGroupStore = create<GroupStore>((set) => ({
   },
   reset: () => {
     set({ ...initialState });
+  },
+  resetCreate: () => {
+    set({
+      createDto: { ...initialState.createDto },
+      createDtoErrors: {},
+    });
+  },
+  resetUpdate: () => {
+    set({
+      updateDto: { ...initialState.updateDto },
+      updateDtoErrors: {},
+    });
   },
 }));

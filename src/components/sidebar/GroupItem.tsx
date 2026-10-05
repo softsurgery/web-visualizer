@@ -17,6 +17,7 @@ interface GroupItemProps {
   isActive: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
+  onEdit?: (id: string, name: string) => void;
   dragHandleProps?: { attributes: any; listeners: any };
 }
 
@@ -26,8 +27,12 @@ export function GroupItem({
   isActive,
   onSelect,
   onDelete,
+  onEdit,
   dragHandleProps,
 }: GroupItemProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete Group",
     description: `Are you sure you want to delete "${group.name}"? This action cannot be undone.`,
@@ -39,7 +44,7 @@ export function GroupItem({
         <Button
           variant="destructive"
           onClick={(e) => {
-            onDelete(group.id, e as any);
+            onDelete(group.id, e);
             close();
           }}
         >
@@ -48,9 +53,6 @@ export function GroupItem({
       </div>
     ),
   });
-
-  const router = useRouter();
-  const pathname = usePathname();
 
   return (
     <SidebarMenuItem className={className}>
@@ -61,7 +63,7 @@ export function GroupItem({
           onSelect(group.id);
           router.push(`/?group=${encodeURIComponent(group.name)}`);
         }}
-        className="justify-between"
+        className="justify-between group-has-data-[sidebar=menu-action]/menu-item:pr-14"
       >
         <div className="flex items-center gap-2 overflow-hidden">
           {dragHandleProps ? (
