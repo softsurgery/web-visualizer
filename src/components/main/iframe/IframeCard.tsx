@@ -1,10 +1,14 @@
 import { X, Edit2, GripVertical } from "lucide-react";
 import { useDialog } from "@/hooks/useDialog";
+import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { DESKTOP_WIDTH } from "./constants";
+import { DESKTOP_WIDTH } from "../constants";
 import { cn } from "cn";
+import { FormBuilder } from "@/components/shared/form-builder/FormBuilder";
+import { useEditUrlFormStructure } from "./forms/useEditUrlFormStructure";
+import { useUrlStore } from "@/hooks/stores";
 
 interface IframeCardProps {
   className?: string;
@@ -40,17 +44,10 @@ export function IframeCard({
   const [useProxy, setUseProxy] = React.useState(false);
   const [isChecking, setIsChecking] = React.useState(true);
 
-  const [editUrl, setEditUrl] = React.useState(url);
-  const [editName, setEditName] = React.useState(name);
-  const [editPointToCenter, setEditPointToCenter] = React.useState(
-    pointToCenter || false,
-  );
-
-  React.useEffect(() => {
-    setEditUrl(url);
-    setEditName(name);
-    setEditPointToCenter(pointToCenter || false);
-  }, [url, name, pointToCenter]);
+  const urlStore = useUrlStore();
+  const { editUrlFormStructure } = useEditUrlFormStructure({
+    store: urlStore,
+  });
 
   React.useEffect(() => {
     setIsChecking(true);
@@ -77,7 +74,7 @@ export function IframeCard({
         // avoid dividing by zero or setting scale too high
         setScale(Math.max(0.1, width / DESKTOP_WIDTH));
       }
-      
+
       if (pointToCenter && !isChecking && !useProxy) {
         setTimeout(() => {
           container.scrollTop =
@@ -119,43 +116,26 @@ export function IframeCard({
     ),
   });
 
-  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog } =
-    useDialog({
+  const { SheetFragment: EditSheetFragment, openSheet: openEditSheet } =
+    useSheet({
       title: "Edit URL",
       description: "Update the details for this URL.",
+      side: "right",
       children: (_isOpen, close) => (
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onEdit(editUrl, editName, editPointToCenter);
+            const {
+              name: updatedName,
+              url: updatedUrl,
+              pointToCenter: updatedPtc,
+            } = urlStore.updateDto;
+            onEdit(updatedUrl, updatedName, Boolean(updatedPtc));
             close();
           }}
           className="flex flex-col gap-4 mt-4"
         >
-          <input
-            type="text"
-            placeholder="Name"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-            autoFocus
-          />
-          <input
-            type="text"
-            placeholder="https://example.com"
-            value={editUrl}
-            onChange={(e) => setEditUrl(e.target.value)}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-          />
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={editPointToCenter}
-              onChange={(e) => setEditPointToCenter(e.target.checked)}
-              className="rounded border-border text-foreground focus:ring-foreground"
-            />
-            Point to Center
-          </label>
+          <FormBuilder structure={editUrlFormStructure} />
           <div className="flex justify-end gap-2 mt-4">
             <Button type="button" variant="outline" onClick={close}>
               Cancel
@@ -164,6 +144,7 @@ export function IframeCard({
           </div>
         </form>
       ),
+      className: "min-w-[30vw]",
     });
 
   const handleCardClick = () => {
@@ -180,7 +161,7 @@ export function IframeCard({
       )}
     >
       {DialogFragment}
-      {EditDialogFragment}
+      {EditSheetFragment}
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-20 relative">
         <div className="flex flex-col gap-1 min-w-0 flex-1 pr-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -194,7 +175,10 @@ export function IframeCard({
                     : "bg-success",
               )}
             ></div>
-            <span className="text-xs font-semibold text-foreground truncate" title={name}>
+            <span
+              className="text-xs font-semibold text-foreground truncate"
+              title={name}
+            >
               {name}
             </span>
           </div>
@@ -225,7 +209,13 @@ export function IframeCard({
             size="icon"
             onClick={(e) => {
               e.stopPropagation();
-              openEditDialog();
+              urlStore.set("updateDto", {
+                name,
+                url,
+                pointToCenter: pointToCenter || false,
+              });
+              urlStore.set("updateDtoErrors", {});
+              openEditSheet();
             }}
             className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
             title="Edit URL"
@@ -260,7 +250,7 @@ export function IframeCard({
             <div className="absolute inset-0 z-10" />
 
             {useProxy ? (
-              <div 
+              <div
                 className="absolute top-0 left-0 flex flex-col bg-white text-[#202124] pointer-events-none"
                 style={{
                   width: `${DESKTOP_WIDTH}px`,
@@ -273,7 +263,7 @@ export function IframeCard({
                   paddingRight: "15%",
                 }}
               >
-                <div className="max-w-[600px] w-full">
+                <div className="max-w-150 w-full">
                   <svg
                     className="w-12 h-12 text-[#5f6368] mb-6"
                     viewBox="0 0 24 24"

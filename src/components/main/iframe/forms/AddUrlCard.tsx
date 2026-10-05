@@ -4,6 +4,10 @@ import { useSheet } from "@/hooks/useSheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { FormBuilder } from "@/components/shared/form-builder/FormBuilder";
+import { useAddUrlFormStructure } from "./useAddUrlFormStructure";
+import { useUrlStore } from "@/hooks/stores";
+
 interface AddUrlCardProps {
   className?: string;
   groupName?: string;
@@ -12,25 +16,23 @@ interface AddUrlCardProps {
 
 export function useAddUrlSheet(
   groupName: string | undefined,
-  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void
+  onAddUrl: (url: string, name: string, pointToCenter?: boolean) => void,
 ) {
-  const [newUrl, setNewUrl] = React.useState("");
-  const [newName, setNewName] = React.useState("");
-  const [pointToCenter, setPointToCenter] = React.useState(false);
+  const store = useUrlStore();
+  const { addUrlFormStructure } = useAddUrlFormStructure({ store });
 
   function handleAddUrl(e: React.FormEvent) {
     e.preventDefault();
-    if (!newUrl.trim() || !newName.trim()) return;
+    const { name, url, pointToCenter } = store.createDto;
+    if (!url.trim() || !name.trim()) return;
 
-    let urlToAdd = newUrl.trim();
+    let urlToAdd = url.trim();
     if (!urlToAdd.startsWith("http://") && !urlToAdd.startsWith("https://")) {
       urlToAdd = "https://" + urlToAdd;
     }
 
-    onAddUrl(urlToAdd, newName.trim(), pointToCenter);
-    setNewUrl("");
-    setNewName("");
-    setPointToCenter(false);
+    onAddUrl(urlToAdd, name.trim(), pointToCenter);
+    store.resetCreate();
     closeSheet();
   }
 
@@ -40,33 +42,10 @@ export function useAddUrlSheet(
     side: "right",
     children: (
       <form onSubmit={handleAddUrl} className="flex flex-col gap-4 mt-4">
-        <input
-          type="text"
-          placeholder="Name"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground bg-background text-foreground"
-          autoFocus
-        />
-        <input
-          type="text"
-          placeholder="https://example.com"
-          value={newUrl}
-          onChange={(e) => setNewUrl(e.target.value)}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground bg-background text-foreground"
-        />
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={pointToCenter}
-            onChange={(e) => setPointToCenter(e.target.checked)}
-            className="rounded text-foreground focus:ring-foreground"
-          />
-          Point to Center (Scroll vertically to center of iframe)
-        </label>
+        <FormBuilder structure={addUrlFormStructure} />
         <Button
           type="submit"
-          disabled={!newUrl.trim() || !newName.trim()}
+          disabled={!store.createDto.url.trim() || !store.createDto.name.trim()}
           className="w-full"
         >
           Add URL

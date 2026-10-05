@@ -2,7 +2,6 @@ import React from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { WebsiteData } from "@/components/main/IframeCard";
 import { useIntro } from "@/contexts/IntroContext";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useVisualizer } from "@/hooks/useVisualizer";
@@ -20,11 +19,11 @@ export function WebsiteDetailsView() {
   const params = useParams();
   const searchParams = useSearchParams();
   const urlId = params?.urlId as string | undefined;
-  
+
   const { setIntro } = useIntro();
   const { setRoutes } = useBreadcrumb();
   const { groups, activeGroup } = useVisualizer();
-  
+
   const [scanData, setScanData] = React.useState<WebsiteScanData | null>(null);
   const [isScanning, setIsScanning] = React.useState(false);
   const [scanError, setScanError] = React.useState<string | null>(null);
@@ -34,13 +33,17 @@ export function WebsiteDetailsView() {
 
   const url = urlId ? decodeURIComponent(urlId) : "";
   const name = nameParam || "Website Details";
-  
+
   useTabName(name);
 
   React.useEffect(() => {
     if (url) {
-      const groupForUrl = groups.find((g) => g.urls.some((u) => u.url === url)) || activeGroup;
-      const routes = [{ title: "Groups", href: "/" }] as { title: string; href?: string }[];
+      const groupForUrl =
+        groups.find((g) => g.urls.some((u) => u.url === url)) || activeGroup;
+      const routes = [{ title: "Groups", href: "/" }] as {
+        title: string;
+        href?: string;
+      }[];
       if (groupForUrl) {
         routes.push({ title: groupForUrl.name, href: "/" });
       } else if (activeGroup) {
@@ -55,10 +58,10 @@ export function WebsiteDetailsView() {
 
   React.useEffect(() => {
     if (!url) return;
-    
+
     setIsScanning(true);
     setScanError(null);
-    
+
     fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to scan website");
@@ -79,8 +82,12 @@ export function WebsiteDetailsView() {
   if (!url) {
     return (
       <div className="flex flex-col items-center justify-center p-12">
-        <h2 className="text-2xl font-bold text-foreground">Details not found</h2>
-        <Button onClick={() => router.push("/")} className="mt-4">Go Back</Button>
+        <h2 className="text-2xl font-bold text-foreground">
+          Details not found
+        </h2>
+        <Button onClick={() => router.push("/")} className="mt-4">
+          Go Back
+        </Button>
       </div>
     );
   }
@@ -96,14 +103,23 @@ export function WebsiteDetailsView() {
           </div>
           <div className="grid grid-cols-4 gap-2 border-b border-border pb-2">
             <span className="text-muted-foreground font-medium">URL:</span>
-            <a href={url} target="_blank" rel="noreferrer" className="col-span-3 text-primary hover:underline break-all">
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="col-span-3 text-primary hover:underline break-all"
+            >
               {url}
             </a>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            <span className="text-muted-foreground font-medium">Connection:</span>
+            <span className="text-muted-foreground font-medium">
+              Connection:
+            </span>
             <span className="col-span-3">
-              {isProxiedParam ? "Proxied (Bypassing Security)" : "Direct Connection"}
+              {isProxiedParam
+                ? "Proxied (Bypassing Security)"
+                : "Direct Connection"}
             </span>
           </div>
         </div>
@@ -112,11 +128,15 @@ export function WebsiteDetailsView() {
       <div className="p-6 border border-border rounded-lg bg-card text-card-foreground shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Website Scan Details</h3>
-          {isScanning && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+          {isScanning && (
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+          )}
         </div>
-        
+
         {scanError ? (
-          <p className="text-sm text-destructive">Could not fetch website data: {scanError}</p>
+          <p className="text-sm text-destructive">
+            Could not fetch website data: {scanError}
+          </p>
         ) : scanData ? (
           <div className="flex flex-col gap-3 text-sm">
             <div className="grid grid-cols-4 gap-2 border-b border-border pb-2">
@@ -124,11 +144,15 @@ export function WebsiteDetailsView() {
               <span className="col-span-3 font-semibold">{scanData.title}</span>
             </div>
             <div className="grid grid-cols-4 gap-2 border-b border-border pb-2">
-              <span className="text-muted-foreground font-medium">Description:</span>
+              <span className="text-muted-foreground font-medium">
+                Description:
+              </span>
               <span className="col-span-3">{scanData.description}</span>
             </div>
             <div className="grid grid-cols-4 gap-2 border-b border-border pb-2">
-              <span className="text-muted-foreground font-medium">Generator:</span>
+              <span className="text-muted-foreground font-medium">
+                Generator:
+              </span>
               <span className="col-span-3">{scanData.generator}</span>
             </div>
             <div className="grid grid-cols-4 gap-2">
@@ -145,9 +169,12 @@ export function WebsiteDetailsView() {
 
       <div className="p-6 border border-border rounded-lg bg-card text-card-foreground shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Preview</h3>
-        <div className="relative bg-muted/20 border border-border rounded-md overflow-hidden" style={{ height: "600px" }}>
+        <div
+          className="relative bg-muted/20 border border-border rounded-md overflow-hidden"
+          style={{ height: "600px" }}
+        >
           {isProxiedParam ? (
-            <div 
+            <div
               className="w-full h-full flex flex-col bg-white text-[#202124]"
               style={{
                 fontFamily: '"Segoe UI", Tahoma, sans-serif',

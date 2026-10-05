@@ -1,8 +1,14 @@
 import React from "react";
 import type { Group, LayoutType } from "@/types";
-import { IframeCard } from "@/components/main/IframeCard";
-import { AddUrlCard, useAddUrlSheet } from "@/components/main/AddUrlCard";
-import { EmptyGroupState, EmptyUrlsState } from "@/components/main/EmptyState";
+import { IframeCard } from "@/components/main/iframe/IframeCard";
+import {
+  AddUrlCard,
+  useAddUrlSheet,
+} from "@/components/main/iframe/forms/AddUrlCard";
+import {
+  EmptyGroupState,
+  EmptyUrlsState,
+} from "@/components/main/group/EmptyState";
 import { LayoutGrid, Grid3X3, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,7 +23,7 @@ import {
 import { useDnDGridService, SortableItem } from "@/hooks/useDnDGridService";
 import { useTabName } from "@/hooks/useTabName";
 
-interface MainViewProps {
+interface GroupViewProps {
   className?: string;
   activeGroup?: Group;
   onAddUrl?: (url: string, name: string, pointToCenter?: boolean) => void;
@@ -31,14 +37,14 @@ interface MainViewProps {
   onChangeLayout?: (id: string, layout: LayoutType) => void;
 }
 
-export function MainView({
+export function GroupView({
   className,
   activeGroup: activeGroupProp,
   onAddUrl: onAddUrlProp,
   onEditUrl: onEditUrlProp,
   onDeleteUrl: onDeleteUrlProp,
   onChangeLayout: onChangeLayoutProp,
-}: MainViewProps = {}) {
+}: GroupViewProps) {
   const visualizer = useVisualizer();
   const activeGroup = activeGroupProp ?? visualizer.activeGroup;
   const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
@@ -89,10 +95,11 @@ export function MainView({
     onReorder: handleReorder,
   });
 
-  const { SheetFragment: AddUrlSheet, openSheet: openAddUrlSheet } = useAddUrlSheet(
-    activeGroup?.name,
-    (url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc)
-  );
+  const { SheetFragment: AddUrlSheet, openSheet: openAddUrlSheet } =
+    useAddUrlSheet(
+      activeGroup?.name,
+      (url, name, ptc) => onAddUrl && onAddUrl(url, name, ptc),
+    );
 
   if (!activeGroup) {
     return <EmptyGroupState />;

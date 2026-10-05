@@ -1,3 +1,3 @@
-export { MainView } from "@/components/main/MainView";
+export { MainView } from "@/components/main/group/GroupView";
 export default MainView;
-import { MainView } from "@/components/main/MainView";
+import { MainView } from "@/components/main/group/GroupView";

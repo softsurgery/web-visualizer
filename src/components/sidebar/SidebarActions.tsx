@@ -4,8 +4,10 @@ import { Plus } from "lucide-react";
 import { useSheet } from "@/hooks/useSheet";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-
 import { useRouter } from "next/navigation";
+import { FormBuilder } from "@/components/shared/form-builder/FormBuilder";
+import { useAddGroupFormStructure } from "@/components/main/group/forms/useAddGroupFormStructure";
+import { useGroupStore } from "@/hooks/stores";
 
 interface SidebarActionsProps {
   className?: string;
@@ -13,8 +15,12 @@ interface SidebarActionsProps {
 }
 
 export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
-  const [newGroupName, setNewGroupName] = React.useState("");
+  const store = useGroupStore();
   const router = useRouter();
+
+  const { addGroupFormStructure } = useAddGroupFormStructure({
+    store,
+  });
 
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New Group",
@@ -22,17 +28,10 @@ export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
     side: "left",
     children: (
       <form onSubmit={handleAddGroup} className="flex flex-col gap-4 mt-4">
-        <input
-          type="text"
-          placeholder="New Group Name"
-          value={newGroupName}
-          onChange={(e) => setNewGroupName(e.target.value)}
-          className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-          autoFocus
-        />
+        <FormBuilder structure={addGroupFormStructure} />
         <Button
           type="submit"
-          disabled={!newGroupName.trim()}
+          disabled={!store.createDto.name.trim()}
           className="w-full"
         >
           Add Group
@@ -43,12 +42,12 @@ export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
 
   function handleAddGroup(e: React.FormEvent) {
     e.preventDefault();
-    if (!newGroupName.trim()) return;
-    onAddGroup(newGroupName);
-    const nameToPush = newGroupName.trim();
-    setNewGroupName("");
+    const name = store.createDto.name.trim();
+    if (!name) return;
+    onAddGroup(name);
+    store.reset();
     closeSheet();
-    router.push(`/?group=${encodeURIComponent(nameToPush)}`);
+    router.push(`/?group=${encodeURIComponent(name)}`);
   }
 
   return (
