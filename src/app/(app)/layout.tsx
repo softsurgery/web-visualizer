@@ -3,7 +3,15 @@ import "@/index.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
+  title: "Web Visualizer",
   description: "Web Visualizer built with Next.js 16 and Payload CMS",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/logo.svg",
+  },
 };
 
 import { ClientLayout } from "./ClientLayout";
