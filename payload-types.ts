@@ -158,6 +158,10 @@ export interface Group {
    */
   users: (number | User)[];
   name: string;
+  /**
+   * Set whether this group is public. Public groups can be viewed by anyone with the share link.
+   */
+  isPublic?: boolean | null;
   layout?: ('sm' | 'md' | 'lg' | 'list') | null;
   order?: number | null;
   urls?:
@@ -276,6 +280,7 @@ export interface GroupsSelect<T extends boolean = true> {
   uuid?: T;
   users?: T;
   name?: T;
+  isPublic?: T;
   layout?: T;
   order?: T;
   urls?:

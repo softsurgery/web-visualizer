@@ -8,7 +8,7 @@ import { cn } from "cn";
 
 interface UseCreateGroupSheetProps {
   className?: string;
-  onAddGroup: (name: string) => void;
+  onAddGroup: (name: string, isPublic?: boolean) => void;
 }
 
 export const useCreateGroupSheet = ({
@@ -32,7 +32,7 @@ export const useCreateGroupSheet = ({
     const name = store.createDto.name.trim();
     if (!name) return;
 
-    onAddGroup(name);
+    onAddGroup(name, Boolean(store.createDto.isPublic));
     store.resetCreate();
     closeSheet();
   };

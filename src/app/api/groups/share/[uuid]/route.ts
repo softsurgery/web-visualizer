@@ -1,3 +1,4 @@
+import { headers as getHeaders } from "next/headers";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { NextResponse } from "next/server";
@@ -13,12 +14,29 @@ export async function GET(
     }
 
     const payload = await getPayload({ config });
+    const headers = await getHeaders();
+    const { user } = await payload.auth({ headers });
+
+    const accessCondition = user
+      ? {
+          or: [
+            { isPublic: { equals: true } },
+            { users: { in: [user.id] } },
+          ],
+        }
+      : { isPublic: { equals: true } };
+
     const result = await payload.find({
       collection: "groups",
       where: {
-        or: [
-          { uuid: { equals: uuid } },
-          { name: { equals: decodeURIComponent(uuid) } },
+        and: [
+          {
+            or: [
+              { uuid: { equals: uuid } },
+              { name: { equals: decodeURIComponent(uuid) } },
+            ],
+          },
+          accessCondition,
         ],
       },
       limit: 1,
@@ -26,7 +44,7 @@ export async function GET(
     });
 
     if (!result.docs || result.docs.length === 0) {
-      return NextResponse.json({ error: "Group not found" }, { status: 404 });
+      return NextResponse.json({ error: "Group not found or is private" }, { status: 404 });
     }
 
     const doc = result.docs[0];
@@ -35,6 +53,7 @@ export async function GET(
         id: String(doc.id),
         uuid: (doc as any).uuid || String(doc.id),
         name: doc.name,
+        isPublic: Boolean((doc as any).isPublic),
         layout: doc.layout || "md",
         urls: (doc.urls || []).map((u) => ({
           url: u.url,

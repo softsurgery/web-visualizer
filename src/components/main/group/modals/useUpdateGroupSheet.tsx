@@ -12,7 +12,8 @@ interface UseUpdateGroupSheetProps {
   group?: Group;
   groupId?: string;
   initialName?: string;
-  onEditGroup: (id: string, name: string) => void;
+  initialIsPublic?: boolean;
+  onEditGroup: (id: string, name: string, isPublic?: boolean) => void;
 }
 
 export const useUpdateGroupSheet = ({
@@ -20,6 +21,7 @@ export const useUpdateGroupSheet = ({
   group,
   groupId: groupIdProp,
   initialName: initialNameProp,
+  initialIsPublic: initialIsPublicProp,
   onEditGroup,
 }: UseUpdateGroupSheetProps) => {
   const store = useGroupStore();
@@ -27,13 +29,15 @@ export const useUpdateGroupSheet = ({
 
   const id = groupIdProp ?? group?.id ?? "";
   const name = initialNameProp ?? group?.name ?? "";
+  const isPublic = initialIsPublicProp ?? group?.isPublic ?? false;
 
   const handleReset = React.useCallback(() => {
     store.set("updateDto", {
       name,
+      isPublic,
     });
     store.set("updateDtoErrors", {});
-  }, [name, store]);
+  }, [name, isPublic, store]);
 
   const handleOpen = () => {
     handleReset();
@@ -45,7 +49,7 @@ export const useUpdateGroupSheet = ({
     const updatedName = store.updateDto.name.trim();
     if (!updatedName || !id) return;
 
-    onEditGroup(id, updatedName);
+    onEditGroup(id, updatedName, Boolean(store.updateDto.isPublic));
     store.resetUpdate();
     closeSheet();
   };

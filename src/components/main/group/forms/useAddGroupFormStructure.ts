@@ -1,4 +1,5 @@
 import {
+  CheckboxFieldProps,
   Field,
   FieldVariant,
   FormStructure,
@@ -33,6 +34,20 @@ export const useAddGroupFormStructure = ({
     },
   };
 
+  const isPublicField: Field<CheckboxFieldProps> = {
+    id: "groupIsPublic",
+    label: "Privacy",
+    variant: FieldVariant.CHECKBOX,
+    required: false,
+    description: "Public (anyone with the share link can view)",
+    props: {
+      checked: Boolean(store.createDto.isPublic),
+      onCheckedChange: (checked) => {
+        store.setNested("createDto.isPublic", Boolean(checked));
+      },
+    },
+  };
+
   const addGroupFormStructure: FormStructure = {
     orientation: "horizontal",
     fieldsets: [
@@ -40,6 +55,9 @@ export const useAddGroupFormStructure = ({
         rows: [
           {
             fields: [groupNameField],
+          },
+          {
+            fields: [isPublicField],
           },
         ],
       },

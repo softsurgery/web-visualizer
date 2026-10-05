@@ -7,15 +7,15 @@ import { useVisualizerStore } from "@/hooks/useVisualizer";
 
 interface SidebarActionsProps {
   className?: string;
-  onAddGroup: (name: string) => void;
+  onAddGroup: (name: string, isPublic?: boolean) => void;
 }
 
 export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
   const router = useRouter();
 
   const { SheetFragment, openSheet } = useCreateGroupSheet({
-    onAddGroup: (name) => {
-      onAddGroup(name);
+    onAddGroup: (name, isPublic) => {
+      onAddGroup(name, isPublic);
       const active = useVisualizerStore
         .getState()
         .groups.find((g) => g.name === name);

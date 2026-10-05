@@ -8,11 +8,26 @@ export const Groups: CollectionConfig = {
   },
   access: {
     read: ({ req: { user } }) => {
-      if (!user) return false
+      if (!user) {
+        return {
+          isPublic: {
+            equals: true,
+          },
+        }
+      }
       return {
-        users: {
-          in: [user.id],
-        },
+        or: [
+          {
+            users: {
+              in: [user.id],
+            },
+          },
+          {
+            isPublic: {
+              equals: true,
+            },
+          },
+        ],
       }
     },
     create: ({ req: { user } }) => Boolean(user),
@@ -62,6 +77,14 @@ export const Groups: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'isPublic',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Set whether this group is public. Public groups can be viewed by anyone with the share link.',
+      },
     },
     {
       name: 'layout',

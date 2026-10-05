@@ -12,9 +12,11 @@ interface GroupStoreData {
 const initialState: GroupStoreData = {
   createDto: {
     name: "",
+    isPublic: false,
   },
   updateDto: {
     name: "",
+    isPublic: false,
   },
   createDtoErrors: {},
   updateDtoErrors: {},

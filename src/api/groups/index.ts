@@ -52,6 +52,7 @@ const findAll = async ({
     uuid: doc.uuid || String(doc.id),
     name: doc.name,
     layout: doc.layout,
+    isPublic: Boolean(doc.isPublic),
     urls: (doc.urls || []).map((u: any) => ({
       url: u.url,
       name: u.name,
@@ -68,6 +69,7 @@ const findById = async (id: string): Promise<Group> => {
     uuid: doc.uuid || String(doc.id),
     name: doc.name,
     layout: doc.layout,
+    isPublic: Boolean(doc.isPublic),
     urls: (doc.urls || []).map((u: any) => ({
       url: u.url,
       name: u.name,

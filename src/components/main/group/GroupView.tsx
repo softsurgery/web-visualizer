@@ -7,7 +7,18 @@ import {
   EmptyGroupState,
   EmptyUrlsState,
 } from "@/components/main/group/EmptyState";
-import { LayoutGrid, Grid3X3, Grid2X2, List, Edit2, Plus, Share2, Check } from "lucide-react";
+import {
+  LayoutGrid,
+  Grid3X3,
+  Grid2X2,
+  List,
+  Edit2,
+  Plus,
+  Share2,
+  Check,
+  Globe,
+  Lock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -37,7 +48,7 @@ interface GroupViewProps {
   ) => void;
   onDeleteUrl?: (index: number) => void;
   onChangeLayout?: (id: string, layout: LayoutType) => void;
-  onEditGroup?: (id: string, name: string) => void;
+  onEditGroup?: (id: string, name: string, isPublic?: boolean) => void;
 }
 
 export function GroupView({
@@ -113,8 +124,8 @@ export function GroupView({
   const { SheetFragment: EditGroupSheet, openSheet: openEditGroupSheet } =
     useUpdateGroupSheet({
       group: activeGroup,
-      onEditGroup: (id, name) => {
-        onEditGroup?.(id, name);
+      onEditGroup: (id, name, isPublic) => {
+        onEditGroup?.(id, name, isPublic);
         router.push(`/?group=${activeGroup?.uuid || encodeURIComponent(name)}`);
       },
     });
@@ -160,6 +171,13 @@ export function GroupView({
       {!isReadOnly && EditGroupSheet}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2 min-w-0">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full text-xs font-medium border shrink-0",
+            )}
+          >
+            {activeGroup.isPublic ? <Globe size={20} /> : <Lock size={20} />}
+          </span>
           <h2 className="text-xl font-bold tracking-tight text-foreground truncate">
             {activeGroup.name}
           </h2>
@@ -179,7 +197,15 @@ export function GroupView({
             size="icon"
             onClick={handleShare}
             className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
-            title={copied ? "Link Copied!" : "Share Group"}
+            title={
+              copied
+                ? activeGroup.isPublic
+                  ? "Link Copied!"
+                  : "Link Copied! (Note: Group is private)"
+                : activeGroup.isPublic
+                  ? "Share Group"
+                  : "Share Group (Private)"
+            }
           >
             {copied ? (
               <Check size={16} className="text-green-500" />
@@ -281,7 +307,9 @@ export function GroupView({
                         onEdit={(url, name, pointToCenter) =>
                           onEditUrl(logicalIndex, url, name, pointToCenter)
                         }
-                        dragHandleProps={!isReadOnly ? dragHandleProps : undefined}
+                        dragHandleProps={
+                          !isReadOnly ? dragHandleProps : undefined
+                        }
                       />
                     )}
                   </SortableItem>

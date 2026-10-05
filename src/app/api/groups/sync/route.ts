@@ -53,6 +53,7 @@ export async function POST(req: Request) {
             layout: group.layout || 'md',
             urls: group.urls || [],
             uuid: group.uuid || (match as any).uuid || uuidv4(),
+            isPublic: Boolean(group.isPublic),
             // @ts-ignore
             order: orderIndex++,
           },
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
           uuid: (updated as any).uuid,
           name: updated.name,
           layout: updated.layout,
+          isPublic: Boolean((updated as any).isPublic),
           urls: updated.urls || [],
         })
       } else {
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
             urls: group.urls || [],
             users: [user.id as any],
             uuid: group.uuid || uuidv4(),
+            isPublic: Boolean(group.isPublic),
             // @ts-ignore
             order: orderIndex++,
           },
@@ -85,6 +88,7 @@ export async function POST(req: Request) {
           uuid: (created as any).uuid,
           name: created.name,
           layout: created.layout,
+          isPublic: Boolean((created as any).isPublic),
           urls: created.urls || [],
         })
       }

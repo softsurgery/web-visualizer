@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { X, LayoutGrid, GripVertical } from "lucide-react";
+import { X, LayoutGrid, GripVertical, Globe, Lock } from "lucide-react";
 import type { Group } from "@/types";
 import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuAction,
 } from "@/components/ui/sidebar";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface GroupItemProps {
   className?: string;
@@ -18,7 +18,6 @@ interface GroupItemProps {
   isReadOnly?: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
-  onEdit?: (id: string, name: string) => void;
   dragHandleProps?: { attributes: any; listeners: any };
 }
 
@@ -29,11 +28,9 @@ export function GroupItem({
   isReadOnly,
   onSelect,
   onDelete,
-  onEdit,
   dragHandleProps,
 }: GroupItemProps) {
   const router = useRouter();
-  const pathname = usePathname();
 
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete Group",
@@ -63,11 +60,13 @@ export function GroupItem({
         isActive={isActive}
         onClick={() => {
           onSelect(group.id);
-          router.push(`/?group=${group.uuid || encodeURIComponent(group.name)}`);
+          router.push(
+            `/?group=${group.uuid || encodeURIComponent(group.name)}`,
+          );
         }}
         className="justify-between group-has-data-[sidebar=menu-action]/menu-item:pr-14"
       >
-        <div className="flex items-center gap-2 overflow-hidden">
+        <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
           {!isReadOnly && dragHandleProps ? (
             <div
               {...dragHandleProps.attributes}
@@ -80,7 +79,16 @@ export function GroupItem({
           ) : (
             <LayoutGrid className="size-4 shrink-0 text-sidebar-primary" />
           )}
-          <span className="truncate">{group.name}</span>
+          {group.isPublic ? (
+            <span title="Public Group" className="flex items-center">
+              <Globe size="14" />
+            </span>
+          ) : (
+            <span title="Private Group" className="flex items-center">
+              <Lock size="14" />
+            </span>
+          )}
+          <span className="truncate flex-1">{group.name}</span>
         </div>
       </SidebarMenuButton>
       {!isReadOnly && (

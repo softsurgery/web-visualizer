@@ -19,11 +19,14 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useDnDService } from "@/hooks/useDnDService";
 import { SortableItem } from "@/hooks/useDnDGridService";
 
@@ -32,9 +35,9 @@ interface SidebarProps {
   variant?: "sidebar" | "floating" | "inset";
   groups?: Group[];
   activeGroupId?: string | null;
-  onAddGroup?: (name: string) => void;
+  onAddGroup?: (name: string, isPublic?: boolean) => void;
   onDeleteGroup?: (id: string, e: React.MouseEvent) => void;
-  onEditGroup?: (id: string, name: string) => void;
+  onEditGroup?: (id: string, name: string, isPublic?: boolean) => void;
   onSetActiveGroup?: (id: string) => void;
 }
 
@@ -62,8 +65,8 @@ export function Sidebar({
   const isReadOnly = visualizer.isReadOnly || !isAuthenticated;
 
   const user = {
-    name: userData?.user?.name || '',
-    email: userData?.user?.email || '',
+    name: userData?.user?.name || "",
+    email: userData?.user?.email || "",
   };
 
   const { items: renderedGroups, handleDragEnd } = useDnDService({
@@ -78,7 +81,6 @@ export function Sidebar({
         isReadOnly={isReadOnly}
         onSelect={onSetActiveGroup}
         onDelete={onDeleteGroup}
-        onEdit={onEditGroup}
       />
     ),
   });
@@ -95,12 +97,14 @@ export function Sidebar({
 
       <SidebarContent>
         {!mounted ? (
-           <SidebarGroup>
-             <SidebarGroupLabel>Groups</SidebarGroupLabel>
-           </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Groups</SidebarGroupLabel>
+          </SidebarGroup>
         ) : groups.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground text-sm">
-            {isReadOnly ? "No groups found." : "No groups yet. Create one above!"}
+            {isReadOnly
+              ? "No groups found."
+              : "No groups yet. Create one above!"}
           </div>
         ) : (
           <SidebarGroup>
@@ -113,16 +117,21 @@ export function Sidebar({
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={groups.map(g => g.id)}
+                    items={groups.map((g) => g.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     {renderedGroups.map((rg) => (
                       <SortableItem key={rg.id} id={rg.id}>
-                        {({ attributes, listeners }) => (
-                          React.cloneElement(rg.child as React.ReactElement<any>, {
-                            dragHandleProps: !isReadOnly ? { attributes, listeners } : undefined
-                          })
-                        )}
+                        {({ attributes, listeners }) =>
+                          React.cloneElement(
+                            rg.child as React.ReactElement<any>,
+                            {
+                              dragHandleProps: !isReadOnly
+                                ? { attributes, listeners }
+                                : undefined,
+                            },
+                          )
+                        }
                       </SortableItem>
                     ))}
                   </SortableContext>

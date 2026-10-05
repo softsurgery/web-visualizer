@@ -12,6 +12,7 @@ export interface Group {
   name: string;
   urls: UrlEntry[];
   layout?: LayoutType;
+  isPublic?: boolean;
 }
 
 export interface CreateUrlDto {
@@ -28,10 +29,12 @@ export interface UpdateUrlDto {
 
 export interface CreateGroupDto {
   name: string;
+  isPublic?: boolean;
 }
 
 export interface UpdateGroupDto {
   name: string;
+  isPublic?: boolean;
 }
 
 export interface QueryParams {

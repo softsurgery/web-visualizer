@@ -23,13 +23,15 @@ const syncGroupsToDB = async (groups: Group[]) => {
           if (
             serverMatch &&
             (serverMatch.id !== cg.id ||
-              (serverMatch.uuid && serverMatch.uuid !== cg.uuid))
+              (serverMatch.uuid && serverMatch.uuid !== cg.uuid) ||
+              serverMatch.isPublic !== cg.isPublic)
           ) {
             changed = true;
             return {
               ...cg,
               id: String(serverMatch.id),
               uuid: serverMatch.uuid || cg.uuid,
+              isPublic: Boolean(serverMatch.isPublic),
             };
           }
           return cg;
@@ -58,8 +60,8 @@ interface VisualizerStore {
   activeGroupId: string | null;
   isInitialized: boolean;
   isReadOnly?: boolean;
-  addGroup: (name: string) => void;
-  editGroup: (id: string, name: string) => void;
+  addGroup: (name: string, isPublic?: boolean) => void;
+  editGroup: (id: string, name: string, isPublic?: boolean) => void;
   deleteGroup: (id: string) => void;
   setActiveGroupId: (id: string | null) => void;
   addUrl: (url: string, name: string, pointToCenter?: boolean) => void;
@@ -145,18 +147,32 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
     }
   },
 
-  addGroup: (name: string) => {
+  addGroup: (name: string, isPublic: boolean = false) => {
     const newUuid = uuidv4();
-    const newGroup: Group = { id: newUuid, uuid: newUuid, name, urls: [] };
+    const newGroup: Group = {
+      id: newUuid,
+      uuid: newUuid,
+      name,
+      urls: [],
+      isPublic,
+    };
     const { groups, isInitialized } = get();
     const newGroups = [...groups, newGroup];
     set({ groups: newGroups, activeGroupId: newGroup.id });
     if (isInitialized) syncGroupsToDB(newGroups);
   },
 
-  editGroup: (id: string, name: string) => {
+  editGroup: (id: string, name: string, isPublic?: boolean) => {
     const { groups, isInitialized } = get();
-    const newGroups = groups.map((g) => (g.id === id ? { ...g, name } : g));
+    const newGroups = groups.map((g) =>
+      g.id === id
+        ? {
+            ...g,
+            name,
+            isPublic: isPublic !== undefined ? isPublic : g.isPublic,
+          }
+        : g,
+    );
     set({ groups: newGroups });
     if (isInitialized) syncGroupsToDB(newGroups);
   },
