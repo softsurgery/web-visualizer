@@ -7,7 +7,7 @@ import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings } from "lucide-react";
+import { Settings, LogIn } from "lucide-react";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar as ShadcnSidebar,
@@ -58,6 +58,9 @@ export function Sidebar({
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
   const { data: userData } = useCurrentUserQuery();
+  const isAuthenticated = Boolean(userData?.user);
+  const isReadOnly = visualizer.isReadOnly || !isAuthenticated;
+
   const user = {
     name: userData?.user?.name || '',
     email: userData?.user?.email || '',
@@ -72,6 +75,7 @@ export function Sidebar({
         key={group.id}
         group={group}
         isActive={activeGroupId === group.id && pathname === "/"}
+        isReadOnly={isReadOnly}
         onSelect={onSetActiveGroup}
         onDelete={onDeleteGroup}
         onEdit={onEditGroup}
@@ -96,14 +100,14 @@ export function Sidebar({
            </SidebarGroup>
         ) : groups.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground text-sm">
-            No groups yet. Create one above!
+            {isReadOnly ? "No groups found." : "No groups yet. Create one above!"}
           </div>
         ) : (
           <SidebarGroup>
             <SidebarGroupLabel>Groups</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarActions onAddGroup={onAddGroup} />
+                {!isReadOnly && <SidebarActions onAddGroup={onAddGroup} />}
                 <DndContext
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
@@ -116,7 +120,7 @@ export function Sidebar({
                       <SortableItem key={rg.id} id={rg.id}>
                         {({ attributes, listeners }) => (
                           React.cloneElement(rg.child as React.ReactElement<any>, {
-                            dragHandleProps: { attributes, listeners }
+                            dragHandleProps: !isReadOnly ? { attributes, listeners } : undefined
                           })
                         )}
                       </SortableItem>
@@ -131,15 +135,28 @@ export function Sidebar({
 
       <SidebarFooter>
         <SidebarMenu>
-          <NavUser user={user} />
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === "/settings"}>
-              <Link href="/settings">
-                <Settings className="size-4" />
-                <span>Settings</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {isAuthenticated ? (
+            <>
+              <NavUser user={user} />
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/settings"}>
+                  <Link href="/settings">
+                    <Settings className="size-4" />
+                    <span>Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          ) : (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/login">
+                  <LogIn className="size-4" />
+                  <span>Sign In</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </ShadcnSidebar>

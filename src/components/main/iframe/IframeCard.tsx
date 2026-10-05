@@ -13,6 +13,7 @@ interface IframeCardProps {
   url: string;
   name: string;
   pointToCenter?: boolean;
+  isReadOnly?: boolean;
   onDelete: () => void;
   onEdit: (url: string, name: string, pointToCenter: boolean) => void;
   dragHandleProps?: {
@@ -32,6 +33,7 @@ export function IframeCard({
   url,
   name,
   pointToCenter,
+  isReadOnly,
   onDelete,
   onEdit,
   dragHandleProps,
@@ -158,42 +160,44 @@ export function IframeCard({
             {url}
           </a>
         </div>
-        <div className="flex gap-1 shrink-0 items-center">
-          {dragHandleProps && (
-            <div
-              {...dragHandleProps.attributes}
-              {...dragHandleProps.listeners}
-              className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
-              title="Drag to reorder"
+        {!isReadOnly && (
+          <div className="flex gap-1 shrink-0 items-center">
+            {dragHandleProps && (
+              <div
+                {...dragHandleProps.attributes}
+                {...dragHandleProps.listeners}
+                className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
+                title="Drag to reorder"
+              >
+                <GripVertical size={16} />
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditSheet();
+              }}
+              className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
+              title="Edit URL"
             >
-              <GripVertical size={16} />
-            </div>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEditSheet();
-            }}
-            className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
-            title="Edit URL"
-          >
-            <Edit2 size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              openDialog();
-            }}
-            className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
-            title="Remove URL"
-          >
-            <X size={16} />
-          </Button>
-        </div>
+              <Edit2 size={16} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                openDialog();
+              }}
+              className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
+              title="Remove URL"
+            >
+              <X size={16} />
+            </Button>
+          </div>
+        )}
       </div>
       <div
         className="flex-1 relative bg-muted/20 overflow-y-auto overflow-x-hidden no-scrollbar"

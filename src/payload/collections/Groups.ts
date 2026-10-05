@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { v4 as uuidv4 } from 'uuid'
 
 export const Groups: CollectionConfig = {
   slug: 'groups',
@@ -33,6 +34,20 @@ export const Groups: CollectionConfig = {
     },
   },
   fields: [
+    {
+      name: 'uuid',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: {
+        description: 'Unique UUID for public sharing and identification.',
+      },
+      hooks: {
+        beforeValidate: [
+          ({ value }) => value || uuidv4(),
+        ],
+      },
+    },
     {
       name: 'users',
       type: 'relationship',

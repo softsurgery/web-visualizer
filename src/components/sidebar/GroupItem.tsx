@@ -15,6 +15,7 @@ interface GroupItemProps {
   className?: string;
   group: Group;
   isActive: boolean;
+  isReadOnly?: boolean;
   onSelect: (id: string) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
   onEdit?: (id: string, name: string) => void;
@@ -25,6 +26,7 @@ export function GroupItem({
   className,
   group,
   isActive,
+  isReadOnly,
   onSelect,
   onDelete,
   onEdit,
@@ -61,12 +63,12 @@ export function GroupItem({
         isActive={isActive}
         onClick={() => {
           onSelect(group.id);
-          router.push(`/?group=${encodeURIComponent(group.name)}`);
+          router.push(`/?group=${group.uuid || encodeURIComponent(group.name)}`);
         }}
         className="justify-between group-has-data-[sidebar=menu-action]/menu-item:pr-14"
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          {dragHandleProps ? (
+          {!isReadOnly && dragHandleProps ? (
             <div
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
@@ -81,16 +83,18 @@ export function GroupItem({
           <span className="truncate">{group.name}</span>
         </div>
       </SidebarMenuButton>
-      <SidebarMenuAction
-        onClick={(e) => {
-          e.stopPropagation();
-          openDialog();
-        }}
-        className="text-muted-foreground hover:text-destructive"
-        title="Delete group"
-      >
-        <X size={16} />
-      </SidebarMenuAction>
+      {!isReadOnly && (
+        <SidebarMenuAction
+          onClick={(e) => {
+            e.stopPropagation();
+            openDialog();
+          }}
+          className="text-muted-foreground hover:text-destructive"
+          title="Delete group"
+        >
+          <X size={16} />
+        </SidebarMenuAction>
+      )}
     </SidebarMenuItem>
   );
 }

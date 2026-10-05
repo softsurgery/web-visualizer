@@ -2,6 +2,7 @@ import { headers as getHeaders } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { NextResponse } from 'next/server'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(req: Request) {
   try {
@@ -36,8 +37,9 @@ export async function POST(req: Request) {
 
     let orderIndex = 0
     for (const group of groups) {
-      // Find existing match by ID first, then by name if not yet retained
+      // Find existing match by UUID first, then ID, then by name if not yet retained
       const match =
+        (group.uuid && existingDocs.find((d: any) => d.uuid === group.uuid)) ||
         existingDocs.find((d) => String(d.id) === String(group.id)) ||
         existingDocs.find((d) => !retainedIds.has(d.id) && d.name === group.name)
 
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
             name: group.name,
             layout: group.layout || 'md',
             urls: group.urls || [],
+            uuid: group.uuid || (match as any).uuid || uuidv4(),
             // @ts-ignore
             order: orderIndex++,
           },
@@ -57,6 +60,7 @@ export async function POST(req: Request) {
         })
         savedGroups.push({
           id: String(updated.id),
+          uuid: (updated as any).uuid,
           name: updated.name,
           layout: updated.layout,
           urls: updated.urls || [],
@@ -69,6 +73,7 @@ export async function POST(req: Request) {
             layout: group.layout || 'md',
             urls: group.urls || [],
             users: [user.id as any],
+            uuid: group.uuid || uuidv4(),
             // @ts-ignore
             order: orderIndex++,
           },
@@ -77,6 +82,7 @@ export async function POST(req: Request) {
         retainedIds.add(created.id)
         savedGroups.push({
           id: String(created.id),
+          uuid: (created as any).uuid,
           name: created.name,
           layout: created.layout,
           urls: created.urls || [],

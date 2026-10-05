@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
 import { Plus } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
 import { useCreateGroupSheet } from "../main/group/modals/useCreateGroupSheet";
+import { useVisualizerStore } from "@/hooks/useVisualizer";
 
 interface SidebarActionsProps {
   className?: string;
@@ -16,7 +16,10 @@ export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
   const { SheetFragment, openSheet } = useCreateGroupSheet({
     onAddGroup: (name) => {
       onAddGroup(name);
-      router.push(`/?group=${encodeURIComponent(name)}`);
+      const active = useVisualizerStore
+        .getState()
+        .groups.find((g) => g.name === name);
+      router.push(`/?group=${active?.uuid || encodeURIComponent(name)}`);
     },
   });
 

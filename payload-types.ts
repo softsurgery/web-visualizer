@@ -150,6 +150,10 @@ export interface User {
 export interface Group {
   id: number;
   /**
+   * Unique UUID for public sharing and identification.
+   */
+  uuid?: string | null;
+  /**
    * Users who have access to this group.
    */
   users: (number | User)[];
@@ -269,6 +273,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "groups_select".
  */
 export interface GroupsSelect<T extends boolean = true> {
+  uuid?: T;
   users?: T;
   name?: T;
   layout?: T;

@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import { create } from "zustand";
 import type { Group, LayoutType } from "@/types";
 import { groups as groupsApi } from "@/api/groups";
 let syncTimeout: NodeJS.Timeout | null = null;
 const syncGroupsToDB = async (groups: Group[]) => {
   if (typeof window === "undefined") return;
+  if (useVisualizerStore.getState().isReadOnly) return;
   if (syncTimeout) clearTimeout(syncTimeout);
-  
+
   syncTimeout = setTimeout(async () => {
     try {
       const data = await groupsApi.sync(groups);
@@ -16,11 +17,20 @@ const syncGroupsToDB = async (groups: Group[]) => {
         let changed = false;
         const mapped = currentGroups.map((cg) => {
           const serverMatch =
-            data.groups.find((sg: any) => String(sg.id) === String(cg.id)) ||
-            data.groups.find((sg: any) => sg.name === cg.name);
-          if (serverMatch && serverMatch.id !== cg.id) {
+            (cg.uuid && data.groups.find((sg: any) => sg.uuid === cg.uuid)) ||
+            data.groups.find((sg) => String(sg.id) === String(cg.id)) ||
+            data.groups.find((sg) => sg.name === cg.name);
+          if (
+            serverMatch &&
+            (serverMatch.id !== cg.id ||
+              (serverMatch.uuid && serverMatch.uuid !== cg.uuid))
+          ) {
             changed = true;
-            return { ...cg, id: serverMatch.id };
+            return {
+              ...cg,
+              id: String(serverMatch.id),
+              uuid: serverMatch.uuid || cg.uuid,
+            };
           }
           return cg;
         });
@@ -28,7 +38,7 @@ const syncGroupsToDB = async (groups: Group[]) => {
           const currentActiveId = useVisualizerStore.getState().activeGroupId;
           const updatedActive = mapped.find((g) => {
             const prev = currentGroups.find((cg) => cg.id === currentActiveId);
-            return prev && prev.name === g.name;
+            return prev && (prev.uuid === g.uuid || prev.name === g.name);
           });
           useVisualizerStore.setState({
             groups: mapped,
@@ -47,16 +57,22 @@ interface VisualizerStore {
   groups: Group[];
   activeGroupId: string | null;
   isInitialized: boolean;
+  isReadOnly?: boolean;
   addGroup: (name: string) => void;
   editGroup: (id: string, name: string) => void;
   deleteGroup: (id: string) => void;
   setActiveGroupId: (id: string | null) => void;
   addUrl: (url: string, name: string, pointToCenter?: boolean) => void;
-  editUrl: (index: number, url: string, name: string, pointToCenter?: boolean) => void;
+  editUrl: (
+    index: number,
+    url: string,
+    name: string,
+    pointToCenter?: boolean,
+  ) => void;
   deleteUrl: (index: number) => void;
   importGroups: (groups: Group[]) => void;
   changeGroupLayout: (id: string, layout: LayoutType) => void;
-  reorderUrls: (groupId: string, newUrls: Group['urls']) => void;
+  reorderUrls: (groupId: string, newUrls: Group["urls"]) => void;
   reorderGroups: (newGroups: Group[]) => void;
   initialize: () => Promise<void>;
 }
@@ -65,52 +81,73 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
   groups: [],
   activeGroupId: null,
   isInitialized: false,
+  isReadOnly: false,
 
   initialize: async () => {
     if (get().isInitialized) return;
     try {
-      const payloadGroups = await groupsApi.findAll({ sort: 'order', limit: 1000 });
-      if (payloadGroups && payloadGroups.length > 0) {
-        // Deduplicate groups by name in case DB had duplicates
-        const seenNames = new Set<string>();
-        const uniqueGroups: Group[] = [];
-        let hadDuplicates = false;
-        for (const g of payloadGroups) {
-          if (seenNames.has(g.name)) {
-            hadDuplicates = true;
-          } else {
-            seenNames.add(g.name);
-            uniqueGroups.push(g);
-          }
-        }
-        
-        let initialActiveId = uniqueGroups[0]?.id || null;
-        if (typeof window !== "undefined") {
-          const params = new URLSearchParams(window.location.search);
-          const groupName = params.get("group");
-          if (groupName) {
-            const found = uniqueGroups.find((g) => g.name === groupName);
-            if (found) {
-              initialActiveId = found.id;
-            }
-          }
-        }
+      const urlParams =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const groupParam = urlParams?.get("group");
 
-        set({ groups: uniqueGroups, activeGroupId: initialActiveId });
+      let payloadGroups: Group[] = [];
+      let isAuth = false;
+      try {
+        payloadGroups = await groupsApi.findAll({ sort: "order", limit: 1000 });
+        isAuth = true;
+      } catch {
+        // Not logged in or fetch failed
+      }
 
-        if (hadDuplicates) {
-          syncGroupsToDB(uniqueGroups);
+      // Deduplicate groups
+      const seenKeys = new Set<string>();
+      const uniqueGroups: Group[] = [];
+      for (const g of payloadGroups) {
+        const key = g.uuid || g.id || g.name;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          uniqueGroups.push(g);
         }
       }
-    } catch {
-      // Fetch failed
+
+      let activeGroupFound: Group | null = null;
+      if (groupParam) {
+        activeGroupFound =
+          uniqueGroups.find((g) => g.uuid === groupParam) ||
+          uniqueGroups.find((g) => String(g.id) === groupParam) ||
+          uniqueGroups.find((g) => g.name === groupParam) ||
+          null;
+
+        // If not found in user's groups, load from public share endpoint
+        if (!activeGroupFound) {
+          const sharedGroup = await groupsApi.findByShareUuid(groupParam);
+          if (sharedGroup) {
+            uniqueGroups.unshift(sharedGroup);
+            activeGroupFound = sharedGroup;
+          }
+        }
+      }
+
+      const initialActiveId = activeGroupFound
+        ? activeGroupFound.id
+        : uniqueGroups[0]?.id || null;
+      const isReadOnly = !isAuth && Boolean(activeGroupFound);
+
+      set({
+        groups: uniqueGroups,
+        activeGroupId: initialActiveId,
+        isReadOnly,
+      });
     } finally {
       set({ isInitialized: true });
     }
   },
 
   addGroup: (name: string) => {
-    const newGroup: Group = { id: uuidv4(), name, urls: [] };
+    const newUuid = uuidv4();
+    const newGroup: Group = { id: newUuid, uuid: newUuid, name, urls: [] };
     const { groups, isInitialized } = get();
     const newGroups = [...groups, newGroup];
     set({ groups: newGroups, activeGroupId: newGroup.id });
@@ -143,13 +180,20 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
     const { groups, activeGroupId, isInitialized } = get();
     if (!activeGroupId) return;
     const newGroups = groups.map((g) =>
-      g.id === activeGroupId ? { ...g, urls: [...g.urls, { url, name, pointToCenter }] } : g,
+      g.id === activeGroupId
+        ? { ...g, urls: [...g.urls, { url, name, pointToCenter }] }
+        : g,
     );
     set({ groups: newGroups });
     if (isInitialized) syncGroupsToDB(newGroups);
   },
 
-  editUrl: (indexToEdit: number, url: string, name: string, pointToCenter?: boolean) => {
+  editUrl: (
+    indexToEdit: number,
+    url: string,
+    name: string,
+    pointToCenter?: boolean,
+  ) => {
     const { groups, activeGroupId, isInitialized } = get();
     if (!activeGroupId) return;
     const newGroups = groups.map((g) =>
@@ -194,9 +238,11 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
     if (isInitialized) syncGroupsToDB(newGroups);
   },
 
-  reorderUrls: (groupId: string, newUrls: Group['urls']) => {
+  reorderUrls: (groupId: string, newUrls: Group["urls"]) => {
     const { groups, isInitialized } = get();
-    const newGroups = groups.map((g) => (g.id === groupId ? { ...g, urls: newUrls } : g));
+    const newGroups = groups.map((g) =>
+      g.id === groupId ? { ...g, urls: newUrls } : g,
+    );
     set({ groups: newGroups });
     if (isInitialized) syncGroupsToDB(newGroups);
   },
@@ -211,7 +257,7 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
 export function useVisualizer() {
   const store = useVisualizerStore();
 
-  useEffect(() => {
+  React.useEffect(() => {
     store.initialize();
   }, [store.initialize]);
 

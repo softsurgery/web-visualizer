@@ -49,6 +49,7 @@ const findAll = async ({
   const docs = response.data.docs || [];
   return docs.map((doc: any) => ({
     id: String(doc.id),
+    uuid: doc.uuid || String(doc.id),
     name: doc.name,
     layout: doc.layout,
     urls: (doc.urls || []).map((u: any) => ({
@@ -64,6 +65,7 @@ const findById = async (id: string): Promise<Group> => {
   const doc = response.data;
   return {
     id: String(doc.id),
+    uuid: doc.uuid || String(doc.id),
     name: doc.name,
     layout: doc.layout,
     urls: (doc.urls || []).map((u: any) => ({
@@ -72,6 +74,15 @@ const findById = async (id: string): Promise<Group> => {
       pointToCenter: u.pointToCenter,
     })),
   };
+};
+
+const findByShareUuid = async (uuid: string): Promise<Group | null> => {
+  try {
+    const response = await axios.get<{ group: Group }>(`/groups/share/${encodeURIComponent(uuid)}`);
+    return response.data.group || null;
+  } catch (e) {
+    return null;
+  }
 };
 
 const create = async (data: Partial<Group>): Promise<Group> => {
@@ -98,6 +109,7 @@ export const groups = {
   findPaginated,
   findAll,
   findById,
+  findByShareUuid,
   create,
   update,
   remove,

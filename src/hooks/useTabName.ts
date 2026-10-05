@@ -1,13 +1,16 @@
-import { useEffect, useRef } from "react";
+"use client";
+
+import React from "react";
 
 export function useTabName(title: string) {
-  const expectedTitleRef = useRef(title);
+  const expectedTitleRef = React.useRef(title);
 
-  useEffect(() => {
-    const expectedTitle = title === "Web Visualizer" || title.endsWith(" - Web Visualizer") 
-      ? title 
-      : `${title} - Web Visualizer`;
-      
+  React.useEffect(() => {
+    const expectedTitle =
+      title === "Web Visualizer" || title.endsWith(" - Web Visualizer")
+        ? title
+        : `${title} - Web Visualizer`;
+
     expectedTitleRef.current = expectedTitle;
 
     const enforceTitle = () => {
@@ -22,7 +25,11 @@ export function useTabName(title: string) {
     const observer = new MutationObserver(enforceTitle);
     const head = document.querySelector("head");
     if (head) {
-      observer.observe(head, { childList: true, subtree: true, characterData: true });
+      observer.observe(head, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
     }
 
     // Fallback interval to aggressively prevent Next.js from overwriting it during complex transitions
