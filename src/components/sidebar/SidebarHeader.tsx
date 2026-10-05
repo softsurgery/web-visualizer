@@ -1,4 +1,3 @@
-import { Globe } from "lucide-react";
 import { cn } from "cn";
 
 interface SidebarHeaderProps {
@@ -9,8 +8,14 @@ export function SidebarHeader({ className }: SidebarHeaderProps = {}) {
   return (
     <div className={cn("p-2 flex items-center justify-between", className)}>
       <div className="flex items-center gap-2 py-1.5">
-        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <Globe className="size-4" />
+        <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+          <img
+            src="/logo.svg"
+            alt="Visualizer"
+            width={32}
+            height={32}
+            className="size-8 object-contain"
+          />
         </div>
         <div className="flex flex-col leading-none">
           <span className="font-semibold text-sm text-sidebar-foreground">

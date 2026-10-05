@@ -11,16 +11,15 @@ import {
 import { useRTL } from "./useRTL";
 
 interface UseSheetOptions {
-  children?: React.ReactNode | ((isOpen: boolean, close: () => void) => React.ReactNode);
+  children?:
+    React.ReactNode | ((isOpen: boolean, close: () => void) => React.ReactNode);
   title?: React.ReactNode;
   description?: React.ReactNode;
   className?: string;
   headerClassName?: string;
-  overlayClassName?: string;
   onToggle?: () => void;
   side?: "top" | "right" | "bottom" | "left";
   showCloseButton?: boolean;
-  animated?: boolean;
 }
 
 export function useSheet({
@@ -29,11 +28,9 @@ export function useSheet({
   description,
   className,
   headerClassName,
-  overlayClassName,
   onToggle,
   side,
   showCloseButton,
-  animated = true,
 }: UseSheetOptions) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { isRTL } = useRTL();
@@ -47,31 +44,26 @@ export function useSheet({
       open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
-        if (!open) onToggle?.();
+        if (!open) {
+          onToggle?.();
+        }
       }}
     >
       <SheetContent
         side={resolvedSide}
         showCloseButton={showCloseButton}
-        overlayClassName={cn(
-          !animated &&
-            "!duration-0 data-[state=open]:!duration-0 data-[state=closed]:!duration-0",
-          overlayClassName,
-        )}
-        className={cn(
-          "overflow-y-auto",
-          !animated &&
-            "transition-none !duration-0 data-[state=open]:!duration-0 data-[state=closed]:!duration-0",
-          className,
-        )}
+        className={cn("overflow-y-auto", className)}
       >
         {(title || description) && (
           <SheetHeader className={headerClassName}>
-            {title && <SheetTitle>{title}</SheetTitle>}
+            {title && <SheetTitle className="font-bold">{title}</SheetTitle>}
             {description && <SheetDescription>{description}</SheetDescription>}
           </SheetHeader>
         )}
-        {typeof children === "function" ? children(isOpen, closeSheet) : children}
+
+        {typeof children === "function"
+          ? children(isOpen, closeSheet)
+          : children}
       </SheetContent>
     </Sheet>
   );

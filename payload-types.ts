@@ -150,10 +150,18 @@ export interface User {
 export interface Group {
   id: number;
   /**
+   * Unique UUID for public sharing and identification.
+   */
+  uuid?: string | null;
+  /**
    * Users who have access to this group.
    */
   users: (number | User)[];
   name: string;
+  /**
+   * Set whether this group is public. Public groups can be viewed by anyone with the share link.
+   */
+  isPublic?: boolean | null;
   layout?: ('sm' | 'md' | 'lg' | 'list') | null;
   order?: number | null;
   urls?:
@@ -269,8 +277,10 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "groups_select".
  */
 export interface GroupsSelect<T extends boolean = true> {
+  uuid?: T;
   users?: T;
   name?: T;
+  isPublic?: T;
   layout?: T;
   order?: T;
   urls?:

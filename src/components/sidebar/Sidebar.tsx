@@ -1,12 +1,14 @@
 "use client";
 import React from "react";
 import type { Group } from "@/types";
+import { useCurrentUserQuery } from "@/api";
 import { GroupItem } from "@/components/sidebar/GroupItem";
+import { Spinner } from "@/components/shared/Spinner";
 import { SidebarHeader } from "@/components/sidebar/SidebarHeader";
 import { SidebarActions } from "@/components/sidebar/SidebarActions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar as ShadcnSidebar,
@@ -18,11 +20,14 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useDnDService } from "@/hooks/useDnDService";
 import { SortableItem } from "@/hooks/useDnDGridService";
 
@@ -31,8 +36,9 @@ interface SidebarProps {
   variant?: "sidebar" | "floating" | "inset";
   groups?: Group[];
   activeGroupId?: string | null;
-  onAddGroup?: (name: string) => void;
+  onAddGroup?: (name: string, isPublic?: boolean) => void;
   onDeleteGroup?: (id: string, e: React.MouseEvent) => void;
+  onEditGroup?: (id: string, name: string, isPublic?: boolean) => void;
   onSetActiveGroup?: (id: string) => void;
 }
 
@@ -43,6 +49,7 @@ export function Sidebar({
   activeGroupId: activeGroupIdProp,
   onAddGroup: onAddGroupProp,
   onDeleteGroup: onDeleteGroupProp,
+  onEditGroup: onEditGroupProp,
   onSetActiveGroup: onSetActiveGroupProp,
 }: SidebarProps = {}) {
   const visualizer = useVisualizer();
@@ -50,21 +57,18 @@ export function Sidebar({
   const activeGroupId = activeGroupIdProp ?? visualizer.activeGroupId;
   const onAddGroup = onAddGroupProp ?? visualizer.addGroup;
   const onDeleteGroup = onDeleteGroupProp ?? visualizer.deleteGroup;
+  const onEditGroup = onEditGroupProp ?? visualizer.editGroup;
   const onSetActiveGroup = onSetActiveGroupProp ?? visualizer.setActiveGroupId;
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
-  const [user, setUser] = React.useState({ name: '', email: '' });
+  const { data: userData, isPending: isUserPending } = useCurrentUserQuery();
+  const isAuthenticated = Boolean(userData?.user);
+  const isReadOnly = visualizer.isReadOnly || !isAuthenticated;
 
-  React.useEffect(() => {
-    fetch('/api/users/me')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.user) {
-          setUser({ name: data.user.name || '', email: data.user.email || '' })
-        }
-      })
-      .catch(console.error)
-  }, [])
+  const user = {
+    name: userData?.user?.name || "",
+    email: userData?.user?.email || "",
+  };
 
   const { items: renderedGroups, handleDragEnd } = useDnDService({
     items: groups,
@@ -75,6 +79,7 @@ export function Sidebar({
         key={group.id}
         group={group}
         isActive={activeGroupId === group.id && pathname === "/"}
+        isReadOnly={isReadOnly}
         onSelect={onSetActiveGroup}
         onDelete={onDeleteGroup}
       />
@@ -93,34 +98,41 @@ export function Sidebar({
 
       <SidebarContent>
         {!mounted ? (
-           <SidebarGroup>
-             <SidebarGroupLabel>Groups</SidebarGroupLabel>
-           </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Groups</SidebarGroupLabel>
+          </SidebarGroup>
         ) : groups.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground text-sm">
-            No groups yet. Create one above!
+            {isReadOnly
+              ? "No groups found."
+              : "No groups yet. Create one above!"}
           </div>
         ) : (
           <SidebarGroup>
             <SidebarGroupLabel>Groups</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarActions onAddGroup={onAddGroup} />
+                {!isReadOnly && <SidebarActions onAddGroup={onAddGroup} />}
                 <DndContext
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={groups.map(g => g.id)}
+                    items={groups.map((g) => g.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     {renderedGroups.map((rg) => (
                       <SortableItem key={rg.id} id={rg.id}>
-                        {({ attributes, listeners }) => (
-                          React.cloneElement(rg.child as React.ReactElement<any>, {
-                            dragHandleProps: { attributes, listeners }
-                          })
-                        )}
+                        {({ attributes, listeners }) =>
+                          React.cloneElement(
+                            rg.child as React.ReactElement<any>,
+                            {
+                              dragHandleProps: !isReadOnly
+                                ? { attributes, listeners }
+                                : undefined,
+                            },
+                          )
+                        }
                       </SortableItem>
                     ))}
                   </SortableContext>
@@ -132,15 +144,24 @@ export function Sidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
+        {isUserPending ? (
+          <div className="flex justify-center p-4">
+            <Spinner size="small" />
+          </div>
+        ) : isAuthenticated ? (
           <NavUser user={user} />
-          <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href="/settings" />} isActive={pathname === "/settings"}>
-              <Settings className="size-4" />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        ) : (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/admin/login">
+                  <LogIn className="size-4" />
+                  <span>Sign In</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
       </SidebarFooter>
     </ShadcnSidebar>
   );

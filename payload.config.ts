@@ -15,9 +15,20 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      titleSuffix: "- Web Visualizer",
+      icons: [
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          url: "/logo.svg",
+        },
+      ],
+    },
     components: {
       graphics: {
         Logo: "/src/components/payload/CustomLogo#Logo",
+        Icon: "/src/components/payload/CustomLogo#Icon",
       },
       views: {
         Dashboard: {

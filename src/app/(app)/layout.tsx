@@ -3,30 +3,30 @@ import "@/index.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
+  title: "Web Visualizer",
   description: "Web Visualizer built with Next.js 16 and Payload CMS",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/logo.svg",
+  },
 };
 
-import { headers as getHeaders } from "next/headers";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
-import { redirect } from "next/navigation";
 import { ClientLayout } from "./ClientLayout";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const payload = await getPayload({ config: configPromise });
-  const headers = await getHeaders();
-  const { user } = await payload.auth({ headers });
-
-  if (!user) {
-    redirect("/admin/login");
-  }
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased font-sans bg-background text-foreground" suppressHydrationWarning>
+      <body
+        className="antialiased font-sans bg-background text-foreground"
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

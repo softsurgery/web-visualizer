@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useState, type ReactNode } from "react";
 
 export type BreadcrumbRoute = { title: string; href?: string };

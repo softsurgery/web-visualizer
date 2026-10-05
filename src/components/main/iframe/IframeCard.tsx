@@ -3,16 +3,21 @@ import { useDialog } from "@/hooks/useDialog";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { DESKTOP_WIDTH } from "./constants";
+import { DESKTOP_WIDTH } from "../constants";
 import { cn } from "cn";
+import { Spinner } from "@/components/shared/Spinner";
+import { useCheckFrameableQuery } from "@/api";
+import { useUpdateUrlSheet } from "./modals/useUpdateURLSheet";
 
 interface IframeCardProps {
   className?: string;
   url: string;
   name: string;
   pointToCenter?: boolean;
-  onDelete: () => void;
-  onEdit: (url: string, name: string, pointToCenter: boolean) => void;
+  isReadOnly?: boolean;
+  isShared?: boolean;
+  onDelete?: () => void;
+  onEdit?: (url: string, name: string, pointToCenter: boolean) => void;
   dragHandleProps?: {
     attributes: any;
     listeners: any;
@@ -30,6 +35,8 @@ export function IframeCard({
   url,
   name,
   pointToCenter,
+  isReadOnly,
+  isShared,
   onDelete,
   onEdit,
   dragHandleProps,
@@ -37,35 +44,18 @@ export function IframeCard({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [scale, setScale] = React.useState(1);
-  const [useProxy, setUseProxy] = React.useState(false);
-  const [isChecking, setIsChecking] = React.useState(true);
+  const {
+    data: frameableData,
+    isPending,
+    isError,
+  } = useCheckFrameableQuery(url);
+  const useProxy = isError
+    ? true
+    : frameableData
+      ? !frameableData.frameable
+      : false;
 
-  const [editUrl, setEditUrl] = React.useState(url);
-  const [editName, setEditName] = React.useState(name);
-  const [editPointToCenter, setEditPointToCenter] = React.useState(
-    pointToCenter || false,
-  );
 
-  React.useEffect(() => {
-    setEditUrl(url);
-    setEditName(name);
-    setEditPointToCenter(pointToCenter || false);
-  }, [url, name, pointToCenter]);
-
-  React.useEffect(() => {
-    setIsChecking(true);
-    fetch(`/api/check-frameable?url=${encodeURIComponent(url)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setUseProxy(!data.frameable);
-      })
-      .catch(() => {
-        setUseProxy(true); // Default to proxy on error
-      })
-      .finally(() => {
-        setIsChecking(false);
-      });
-  }, [url]);
 
   React.useEffect(() => {
     const container = containerRef.current;
@@ -77,8 +67,8 @@ export function IframeCard({
         // avoid dividing by zero or setting scale too high
         setScale(Math.max(0.1, width / DESKTOP_WIDTH));
       }
-      
-      if (pointToCenter && !isChecking && !useProxy) {
+
+      if (pointToCenter && !isPending && !useProxy) {
         setTimeout(() => {
           container.scrollTop =
             container.scrollHeight / 2 - container.clientHeight / 2;
@@ -88,7 +78,7 @@ export function IframeCard({
 
     observer.observe(container);
 
-    if (pointToCenter && !isChecking && !useProxy) {
+    if (pointToCenter && !isPending && !useProxy) {
       setTimeout(() => {
         container.scrollTop =
           container.scrollHeight / 2 - container.clientHeight / 2;
@@ -96,7 +86,7 @@ export function IframeCard({
     }
 
     return () => observer.disconnect();
-  }, [isChecking, pointToCenter, useProxy]);
+  }, [isPending, pointToCenter, useProxy]);
 
   const { DialogFragment, openDialog } = useDialog({
     title: "Delete URL",
@@ -119,51 +109,12 @@ export function IframeCard({
     ),
   });
 
-  const { DialogFragment: EditDialogFragment, openDialog: openEditDialog } =
-    useDialog({
-      title: "Edit URL",
-      description: "Update the details for this URL.",
-      children: (_isOpen, close) => (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onEdit(editUrl, editName, editPointToCenter);
-            close();
-          }}
-          className="flex flex-col gap-4 mt-4"
-        >
-          <input
-            type="text"
-            placeholder="Name"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-            autoFocus
-          />
-          <input
-            type="text"
-            placeholder="https://example.com"
-            value={editUrl}
-            onChange={(e) => setEditUrl(e.target.value)}
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-foreground focus:border-transparent bg-background text-foreground"
-          />
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={editPointToCenter}
-              onChange={(e) => setEditPointToCenter(e.target.checked)}
-              className="rounded border-border text-foreground focus:ring-foreground"
-            />
-            Point to Center
-          </label>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button type="button" variant="outline" onClick={close}>
-              Cancel
-            </Button>
-            <Button type="submit">Save</Button>
-          </div>
-        </form>
-      ),
+  const { SheetFragment: EditSheetFragment, openSheet: openEditSheet } =
+    useUpdateUrlSheet({
+      url,
+      name,
+      pointToCenter,
+      onEdit,
     });
 
   const handleCardClick = () => {
@@ -172,6 +123,8 @@ export function IframeCard({
     );
   };
 
+  const isLocked = isReadOnly || isShared;
+
   return (
     <div
       className={cn(
@@ -179,22 +132,26 @@ export function IframeCard({
         className,
       )}
     >
-      {DialogFragment}
-      {EditDialogFragment}
+      {!isLocked && DialogFragment}
+      {!isLocked && EditSheetFragment}
+
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-20 relative">
         <div className="flex flex-col gap-1 min-w-0 flex-1 pr-2">
           <div className="flex items-center gap-2 min-w-0">
             <div
               className={cn(
                 "w-2 h-2 rounded-full shrink-0",
-                isChecking
+                isPending
                   ? "bg-warning"
                   : useProxy
                     ? "bg-warning"
                     : "bg-success",
               )}
             ></div>
-            <span className="text-xs font-semibold text-foreground truncate" title={name}>
+            <span
+              className="text-xs font-semibold text-foreground truncate"
+              title={name}
+            >
               {name}
             </span>
           </div>
@@ -209,48 +166,50 @@ export function IframeCard({
             {url}
           </a>
         </div>
-        <div className="flex gap-1 shrink-0 items-center">
-          {dragHandleProps && (
-            <div
-              {...dragHandleProps.attributes}
-              {...dragHandleProps.listeners}
-              className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
-              title="Drag to reorder"
-            >
-              <GripVertical size={16} />
+        {!isLocked && (
+            <div className="flex gap-1 shrink-0 items-center">
+              {dragHandleProps && (
+                <div
+                  {...dragHandleProps.attributes}
+                  {...dragHandleProps.listeners}
+                  className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
+                  title="Drag to reorder"
+                >
+                  <GripVertical size={16} />
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditSheet();
+                }}
+                className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
+                title="Edit URL"
+              >
+                <Edit2 size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDialog();
+                }}
+                className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
+                title="Remove URL"
+              >
+                <X size={16} />
+              </Button>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEditDialog();
-            }}
-            className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
-            title="Edit URL"
-          >
-            <Edit2 size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              openDialog();
-            }}
-            className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
-            title="Remove URL"
-          >
-            <X size={16} />
-          </Button>
         </div>
-      </div>
       <div
         className="flex-1 relative bg-muted/20 overflow-y-auto overflow-x-hidden no-scrollbar"
         ref={containerRef}
       >
-        {!isChecking && (
+        {!isPending && (
           <div
             className="relative w-full cursor-pointer"
             style={{ height: 4000 * scale }}
@@ -260,7 +219,7 @@ export function IframeCard({
             <div className="absolute inset-0 z-10" />
 
             {useProxy ? (
-              <div 
+              <div
                 className="absolute top-0 left-0 flex flex-col bg-white text-[#202124] pointer-events-none"
                 style={{
                   width: `${DESKTOP_WIDTH}px`,
@@ -273,7 +232,7 @@ export function IframeCard({
                   paddingRight: "15%",
                 }}
               >
-                <div className="max-w-[600px] w-full">
+                <div className="max-w-150 w-full">
                   <svg
                     className="w-12 h-12 text-[#5f6368] mb-6"
                     viewBox="0 0 24 24"
@@ -326,11 +285,9 @@ export function IframeCard({
             )}
           </div>
         )}
-        {isChecking && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm text-muted-foreground animate-pulse">
-              Checking connection...
-            </span>
+        {isPending && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
+            <Spinner />
           </div>
         )}
       </div>

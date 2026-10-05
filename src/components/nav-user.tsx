@@ -20,8 +20,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, BadgeCheckIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { ChevronsUpDownIcon, BadgeCheckIcon, BellIcon, LogOutIcon, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { users } from "@/api/users"
 
 export function NavUser({
   user,
@@ -37,7 +39,7 @@ export function NavUser({
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/users/logout', { method: 'POST' })
+      await users.logout()
       router.push('/admin/login')
     } catch (error) {
       console.error('Logout failed:', error)
@@ -51,20 +53,18 @@ export function NavUser({
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
-            }
-          >
-            <Avatar>
-              {user.avatar && <AvatarImage src={user.avatar} alt={user.name || user.email} />}
-              <AvatarFallback>{userInitials}</AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name || 'Account'}</span>
-              <span className="truncate text-xs">{user.email}</span>
-            </div>
-            <ChevronsUpDownIcon className="ml-auto size-4" />
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+              <Avatar>
+                {user.avatar && <AvatarImage src={user.avatar} alt={user.name || user.email} />}
+                <AvatarFallback>{userInitials}</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name || 'Account'}</span>
+                <span className="truncate text-xs">{user.email}</span>
+              </div>
+              <ChevronsUpDownIcon className="ml-auto size-4" />
+            </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
@@ -88,6 +88,12 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="cursor-pointer">
+                  <Settings className="mr-2 size-4" />
+                  Settings
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <BadgeCheckIcon className="mr-2 size-4" />
                 Account
