@@ -31,6 +31,8 @@ export function Header({
     return activeGroup?.name || "Visualizer";
   };
 
+  const isShared = visualizer.isShared || pathname?.startsWith("/share");
+
   return (
     <header
       className={cn(
@@ -39,7 +41,7 @@ export function Header({
       )}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        <SidebarTrigger className="-ml-1 mr-2 shrink-0" />
+        {!isShared && <SidebarTrigger className="-ml-1 mr-2 shrink-0" />}
         {routes && routes.length > 0 ? (
           <BreadcrumbCommon />
         ) : (

@@ -60,6 +60,7 @@ interface VisualizerStore {
   activeGroupId: string | null;
   isInitialized: boolean;
   isReadOnly?: boolean;
+  isShared?: boolean;
   addGroup: (name: string, isPublic?: boolean) => void;
   editGroup: (id: string, name: string, isPublic?: boolean) => void;
   deleteGroup: (id: string) => void;
@@ -84,6 +85,7 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
   activeGroupId: null,
   isInitialized: false,
   isReadOnly: false,
+  isShared: false,
 
   initialize: async () => {
     if (get().isInitialized) return;
@@ -92,7 +94,17 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search)
           : null;
-      const groupParam = urlParams?.get("group");
+      let groupParam = urlParams?.get("group");
+      const isSharedPath =
+        typeof window !== "undefined" &&
+        window.location.pathname.startsWith("/share");
+
+      if (!groupParam && isSharedPath && typeof window !== "undefined") {
+        const shareMatch = window.location.pathname.match(/\/share\/([^/?#]+)/);
+        if (shareMatch) {
+          groupParam = decodeURIComponent(shareMatch[1]);
+        }
+      }
 
       let payloadGroups: Group[] = [];
       let isAuth = false;
@@ -135,12 +147,18 @@ export const useVisualizerStore = create<VisualizerStore>((set, get) => ({
       const initialActiveId = activeGroupFound
         ? activeGroupFound.id
         : uniqueGroups[0]?.id || null;
-      const isReadOnly = !isAuth && Boolean(activeGroupFound);
+      const isShared = Boolean(
+        isSharedPath ||
+          urlParams?.get("shared") === "true" ||
+          (!isAuth && Boolean(activeGroupFound)),
+      );
+      const isReadOnly = isShared || (!isAuth && Boolean(activeGroupFound));
 
       set({
         groups: uniqueGroups,
         activeGroupId: initialActiveId,
         isReadOnly,
+        isShared,
       });
     } finally {
       set({ isInitialized: true });

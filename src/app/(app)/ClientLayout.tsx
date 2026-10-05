@@ -10,6 +10,8 @@ import { Footer } from "@/components/layout/Footer";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
+import { usePathname } from "next/navigation";
+import { useVisualizer } from "@/hooks/useVisualizer";
 
 interface LayoutProps {
   className?: string;
@@ -20,6 +22,14 @@ function LayoutShell({ className, children }: LayoutProps) {
   const { title, description, floating } = useIntro();
   const { content } = useFooter();
   const { enableMainOverflow, showSidebar = true } = useUI();
+  const pathname = usePathname();
+  const visualizer = useVisualizer();
+
+  const isShared =
+    pathname?.startsWith("/share") ||
+    visualizer.isShared ||
+    (typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("shared") === "true");
 
   return (
     <SidebarProvider
@@ -31,7 +41,7 @@ function LayoutShell({ className, children }: LayoutProps) {
         } as CSSProperties
       }
     >
-      {showSidebar ? <AppSidebar variant="inset" /> : null}
+      {!isShared && showSidebar ? <AppSidebar variant="inset" /> : null}
       <SidebarInset className="min-h-0 overflow-hidden">
         <Header />
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

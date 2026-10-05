@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { GroupView } from "@/components/main/group/GroupView";
 
 export default async function SharePage({
   params,
@@ -6,5 +6,6 @@ export default async function SharePage({
   params: Promise<{ uuid: string }>;
 }) {
   const { uuid } = await params;
-  redirect(`/?group=${encodeURIComponent(uuid)}`);
+  return <GroupView isShared={true} shareUuid={uuid} />;
 }
+

@@ -14,7 +14,11 @@ export default async function HomePage({
   const headers = await getHeaders();
   const { user } = await payload.auth({ headers });
 
-  if (!user && !params?.group) {
+  if (!user && params?.group) {
+    redirect(`/share/${encodeURIComponent(params.group)}`);
+  }
+
+  if (!user) {
     redirect("/admin/login");
   }
 

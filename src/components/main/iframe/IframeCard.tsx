@@ -14,8 +14,9 @@ interface IframeCardProps {
   name: string;
   pointToCenter?: boolean;
   isReadOnly?: boolean;
-  onDelete: () => void;
-  onEdit: (url: string, name: string, pointToCenter: boolean) => void;
+  isShared?: boolean;
+  onDelete?: () => void;
+  onEdit?: (url: string, name: string, pointToCenter: boolean) => void;
   dragHandleProps?: {
     attributes: any;
     listeners: any;
@@ -34,6 +35,7 @@ export function IframeCard({
   name,
   pointToCenter,
   isReadOnly,
+  isShared,
   onDelete,
   onEdit,
   dragHandleProps,
@@ -120,6 +122,8 @@ export function IframeCard({
     );
   };
 
+  const isLocked = isReadOnly || isShared;
+
   return (
     <div
       className={cn(
@@ -127,8 +131,9 @@ export function IframeCard({
         className,
       )}
     >
-      {DialogFragment}
-      {EditSheetFragment}
+      {!isLocked && DialogFragment}
+      {!isLocked && EditSheetFragment}
+
       <div className="px-4 py-2 bg-muted/50 border-b border-border flex justify-between items-center z-20 relative">
         <div className="flex flex-col gap-1 min-w-0 flex-1 pr-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -160,45 +165,45 @@ export function IframeCard({
             {url}
           </a>
         </div>
-        {!isReadOnly && (
-          <div className="flex gap-1 shrink-0 items-center">
-            {dragHandleProps && (
-              <div
-                {...dragHandleProps.attributes}
-                {...dragHandleProps.listeners}
-                className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
-                title="Drag to reorder"
+        {!isLocked && (
+            <div className="flex gap-1 shrink-0 items-center">
+              {dragHandleProps && (
+                <div
+                  {...dragHandleProps.attributes}
+                  {...dragHandleProps.listeners}
+                  className="cursor-grab text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center transition"
+                  title="Drag to reorder"
+                >
+                  <GripVertical size={16} />
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditSheet();
+                }}
+                className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
+                title="Edit URL"
               >
-                <GripVertical size={16} />
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                openEditSheet();
-              }}
-              className="text-muted-foreground hover:text-foreground h-8 w-8 transition"
-              title="Edit URL"
-            >
-              <Edit2 size={16} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                openDialog();
-              }}
-              className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
-              title="Remove URL"
-            >
-              <X size={16} />
-            </Button>
-          </div>
-        )}
-      </div>
+                <Edit2 size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDialog();
+                }}
+                className="text-muted-foreground hover:text-destructive h-8 w-8 transition"
+                title="Remove URL"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          )}
+        </div>
       <div
         className="flex-1 relative bg-muted/20 overflow-y-auto overflow-x-hidden no-scrollbar"
         ref={containerRef}

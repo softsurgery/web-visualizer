@@ -39,6 +39,8 @@ interface GroupViewProps {
   className?: string;
   activeGroup?: Group;
   isReadOnly?: boolean;
+  isShared?: boolean;
+  shareUuid?: string;
   onAddUrl?: (url: string, name: string, pointToCenter?: boolean) => void;
   onEditUrl?: (
     index: number,
@@ -55,6 +57,8 @@ export function GroupView({
   className,
   activeGroup: activeGroupProp,
   isReadOnly: isReadOnlyProp,
+  isShared: isSharedProp,
+  shareUuid,
   onAddUrl: onAddUrlProp,
   onEditUrl: onEditUrlProp,
   onDeleteUrl: onDeleteUrlProp,
@@ -63,8 +67,13 @@ export function GroupView({
 }: GroupViewProps) {
   const router = useRouter();
   const visualizer = useVisualizer();
+  const isShared =
+    isSharedProp ??
+    visualizer.isShared ??
+    (typeof window !== "undefined" &&
+      window.location.pathname.startsWith("/share"));
   const activeGroup = activeGroupProp ?? visualizer.activeGroup;
-  const isReadOnly = isReadOnlyProp ?? visualizer.isReadOnly;
+  const isReadOnly = isReadOnlyProp ?? visualizer.isReadOnly ?? isShared;
   const onAddUrl = onAddUrlProp ?? visualizer.addUrl;
   const onEditUrl = onEditUrlProp ?? visualizer.editUrl;
   const onDeleteUrl = onDeleteUrlProp ?? visualizer.deleteUrl;
@@ -132,7 +141,7 @@ export function GroupView({
 
   const handleShare = async () => {
     if (!activeGroup || typeof window === "undefined") return;
-    const shareUrl = `${window.location.origin}/?group=${activeGroup.uuid || activeGroup.id}`;
+    const shareUrl = `${window.location.origin}/share/${activeGroup.uuid || activeGroup.id}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -167,8 +176,8 @@ export function GroupView({
 
   return (
     <div className={cn("flex flex-col gap-4 w-full flex-1 h-full", className)}>
-      {!isReadOnly && AddUrlSheet}
-      {!isReadOnly && EditGroupSheet}
+      {!isReadOnly && !isShared && AddUrlSheet}
+      {!isReadOnly && !isShared && EditGroupSheet}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2 min-w-0">
           <span
@@ -181,7 +190,7 @@ export function GroupView({
           <h2 className="text-xl font-bold tracking-tight text-foreground truncate">
             {activeGroup.name}
           </h2>
-          {!isReadOnly && (
+          {!isReadOnly && !isShared && (
             <Button
               variant="ghost"
               size="icon"
@@ -251,7 +260,7 @@ export function GroupView({
               </Button>
             </>
           )}
-          {!isReadOnly && (
+          {!isReadOnly && !isShared && (
             <Button
               variant="outline"
               size="icon"
@@ -264,10 +273,16 @@ export function GroupView({
         </div>
       </div>
       {activeGroup.urls.length === 0 ? (
-        <EmptyUrlsState
-          className="flex-1"
-          onAddAction={!isReadOnly ? openAddUrlSheet : undefined}
-        />
+        isShared ? (
+          <div className="flex flex-1 items-center justify-center p-8 text-center text-muted-foreground">
+            <p className="text-lg">No websites in this group</p>
+          </div>
+        ) : (
+          <EmptyUrlsState
+            className="flex-1"
+            onAddAction={!isReadOnly ? openAddUrlSheet : undefined}
+          />
+        )
       ) : (
         <DndContext
           sensors={sensors}
@@ -303,12 +318,13 @@ export function GroupView({
                         name={entry.name}
                         pointToCenter={entry.pointToCenter}
                         isReadOnly={isReadOnly}
+                        isShared={isShared}
                         onDelete={() => onDeleteUrl(logicalIndex)}
                         onEdit={(url, name, pointToCenter) =>
                           onEditUrl(logicalIndex, url, name, pointToCenter)
                         }
                         dragHandleProps={
-                          !isReadOnly ? dragHandleProps : undefined
+                          !isReadOnly && !isShared ? dragHandleProps : undefined
                         }
                       />
                     )}

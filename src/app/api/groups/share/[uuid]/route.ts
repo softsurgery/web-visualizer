@@ -26,15 +26,20 @@ export async function GET(
         }
       : { isPublic: { equals: true } };
 
+    const matchConditions: any[] = [
+      { uuid: { equals: uuid } },
+      { name: { equals: decodeURIComponent(uuid) } },
+    ];
+    if (/^\d+$/.test(uuid)) {
+      matchConditions.push({ id: { equals: Number(uuid) } });
+    }
+
     const result = await payload.find({
       collection: "groups",
       where: {
         and: [
           {
-            or: [
-              { uuid: { equals: uuid } },
-              { name: { equals: decodeURIComponent(uuid) } },
-            ],
+            or: matchConditions,
           },
           accessCondition,
         ],
