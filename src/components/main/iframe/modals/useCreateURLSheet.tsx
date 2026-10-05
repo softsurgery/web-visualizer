@@ -38,19 +38,33 @@ export const useCreateUrlSheet = ({
     title: "Add New URL",
     description: groupName ? `Add a new URL to ${groupName}` : "Add a new URL",
     side: "right",
+    className: "min-w-[33vw] px-4",
+    headerClassName: "px-0",
     children: (
       <form
         onSubmit={handleAddUrl}
-        className={cn("flex flex-col gap-4 mt-4", className)}
+        className={cn("flex flex-col flex-1 gap-4 pb-4", className)}
       >
         <FormBuilder structure={addUrlFormStructure} />
-        <Button
-          type="submit"
-          disabled={!store.createDto.url.trim() || !store.createDto.name.trim()}
-          className="w-full"
-        >
-          Add URL
-        </Button>
+        <div className="flex justify-end gap-2 mt-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => store.resetCreate()}
+            className="w-fit"
+          >
+            Reset
+          </Button>
+          <Button
+            type="submit"
+            disabled={
+              !store.createDto.url.trim() || !store.createDto.name.trim()
+            }
+            className="w-fit"
+          >
+            Save
+          </Button>
+        </div>
       </form>
     ),
   });

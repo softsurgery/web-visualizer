@@ -25,17 +25,32 @@ export function SidebarActions({ className, onAddGroup }: SidebarActionsProps) {
   const { SheetFragment, openSheet, closeSheet } = useSheet({
     title: "Add New Group",
     description: "Enter a name for the new URL group.",
-    side: "left",
+    side: "right",
+    className: "min-w-[33vw] px-4",
+    headerClassName: "px-0",
     children: (
-      <form onSubmit={handleAddGroup} className="flex flex-col gap-4 mt-4">
+      <form
+        onSubmit={handleAddGroup}
+        className="flex flex-col flex-1 gap-4 pb-4"
+      >
         <FormBuilder structure={addGroupFormStructure} />
-        <Button
-          type="submit"
-          disabled={!store.createDto.name.trim()}
-          className="w-full"
-        >
-          Add Group
-        </Button>
+        <div className="flex justify-end gap-2 mt-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => store.reset()}
+            className="w-fit"
+          >
+            Reset
+          </Button>
+          <Button
+            type="submit"
+            disabled={!store.createDto.name.trim()}
+            className="w-fit"
+          >
+            Save
+          </Button>
+        </div>
       </form>
     ),
   });

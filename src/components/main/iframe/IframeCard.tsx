@@ -42,8 +42,16 @@ export function IframeCard({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [scale, setScale] = React.useState(1);
-  const { data: frameableData, isLoading: isChecking, isError } = useCheckFrameableQuery(url);
-  const useProxy = isError ? true : (frameableData ? !frameableData.frameable : false);
+  const {
+    data: frameableData,
+    isLoading: isChecking,
+    isError,
+  } = useCheckFrameableQuery(url);
+  const useProxy = isError
+    ? true
+    : frameableData
+      ? !frameableData.frameable
+      : false;
 
   const urlStore = useUrlStore();
   const { editUrlFormStructure } = useEditUrlFormStructure({
@@ -107,6 +115,8 @@ export function IframeCard({
       title: "Edit URL",
       description: "Update the details for this URL.",
       side: "right",
+      className: "min-w-[33vw] px-4",
+      headerClassName: "px-0",
       children: (_isOpen, close) => (
         <form
           onSubmit={(e) => {
@@ -119,18 +129,31 @@ export function IframeCard({
             onEdit(updatedUrl, updatedName, Boolean(updatedPtc));
             close();
           }}
-          className="flex flex-col gap-4 mt-4"
+          className="flex flex-col flex-1 gap-4 pb-4"
         >
           <FormBuilder structure={editUrlFormStructure} />
-          <div className="flex justify-end gap-2 mt-4">
-            <Button type="button" variant="outline" onClick={close}>
-              Cancel
+          <div className="flex justify-end gap-2 mt-auto">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                urlStore.set("updateDto", {
+                  name,
+                  url,
+                  pointToCenter: Boolean(pointToCenter),
+                });
+                urlStore.set("updateDtoErrors", {});
+              }}
+              className="w-fit"
+            >
+              Reset
             </Button>
-            <Button type="submit">Save</Button>
+            <Button type="submit" className="w-fit">
+              Save
+            </Button>
           </div>
         </form>
       ),
-      className: "min-w-[30vw]",
     });
 
   const handleCardClick = () => {
