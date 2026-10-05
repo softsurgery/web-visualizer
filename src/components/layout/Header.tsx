@@ -5,7 +5,7 @@ import { useVisualizer } from "@/hooks/useVisualizer";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { BreadcrumbCommon } from "@/components/layout/BreadcrumbCommon";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "../shared/mode-toggle";
+import { ModeToggle } from "../shared/ModeToggle";
 import { usePathname } from "next/navigation";
 
 interface HeaderProps {
