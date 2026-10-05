@@ -90,6 +90,66 @@ Web Visualizer enables users to curate, organize, and monitor multiple web pages
 
 ---
 
+## 🐳 Docker Setup & Deployment
+
+Web Visualizer provides an optimized multi-stage `Dockerfile` and a ready-to-use `docker-compose.yml` configured for production performance with minimal image size via Next.js standalone output.
+
+### 1. Running with Docker Compose (Recommended)
+
+The easiest way to spin up Web Visualizer alongside a PostgreSQL 16 database is via Docker Compose:
+
+```bash
+# Build and start all services (app + Postgres) in detached mode
+docker compose up -d --build
+
+# View application logs
+docker compose logs -f app
+
+# Stop the containers
+docker compose down
+```
+
+The application will be available at `http://localhost:3000` and the Payload CMS admin at `http://localhost:3000/admin`.
+
+### 2. Manual Docker Build & Run
+
+You can also build and run the Docker image independently:
+
+```bash
+# Build the production image
+docker build -t web-visualizer:latest .
+
+# Run the container
+docker run -d \
+  -p 3000:3000 \
+  --name web-visualizer \
+  -e PAYLOAD_SECRET="your-secure-payload-secret" \
+  -e DATABASE_URI="postgres://postgres:postgres@host.docker.internal:5432/web_visualizer" \
+  web-visualizer:latest
+```
+
+---
+
+## 🚀 Automated Deployment to Docker Hub (CI/CD)
+
+An automated GitHub Actions workflow is set up at [`.github/workflows/docker-publish.yml`](file:///.github/workflows/docker-publish.yml) to automatically build and push multi-platform (`linux/amd64`, `linux/arm64`) images to Docker Hub.
+
+### Trigger Events
+- **Push to `main`**: Automatically builds and tags as `:latest` and branch name.
+- **Push to `develop`**: Builds and tags image as `:develop`.
+- **Git Tags (`v*.*.*`)**: Builds and tags semver versions (e.g. `:v1.0.0`, `:1.0`, `:1`).
+- **Pull Requests to `main`**: Runs a test build without pushing to verify Docker compilation.
+- **Manual Dispatch**: Triggerable from GitHub Actions tab with custom tag inputs.
+
+### Setting Up Docker Hub Credentials in GitHub
+To enable automatic publishing, configure the following secrets in your GitHub repository (**Settings > Secrets and variables > Actions > Secrets**):
+
+1. `DOCKERHUB_USERNAME`: Your Docker Hub account username.
+2. `DOCKERHUB_TOKEN`: A Docker Hub Personal Access Token (generate at [Docker Hub Account Settings > Security > New Access Token](https://hub.docker.com/settings/security)).
+3. `DOCKERHUB_REPO` *(Optional)*: If you are pushing to an organization or custom repository path (defaults to `<DOCKERHUB_USERNAME>/web-visualizer`).
+
+---
+
 ## 🔍 How the Proxy Middleware Works
 
 Modern web applications often set HTTP headers such as:
