@@ -95,14 +95,16 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   background-color: var(--background);
   color: var(--foreground);
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: "Geist Variable", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -157,6 +159,29 @@ body {
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    @apply w-1 h-2;
+    opacity: 0; /* Initially invisible */
+    transition: opacity 1s ease; /* Smooth fade out */
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    @apply bg-foreground/80 rounded-lg;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-foreground;
+  }
+
+  /* Scrollbar visible state */
+  .scrollbar-visible ::-webkit-scrollbar {
+    opacity: 1; /* Visible scrollbar */
   }
 }
 
