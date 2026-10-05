@@ -40,25 +40,18 @@ export interface FieldsetRow {
 export enum FieldVariant {
   TEXT = "text",
   EMAIL = "email",
+  URL = "url",
   TEL = "tel",
   NUMBER = "number",
-  URL = "url",
-  PASSWORD = "password",
-  DATE = "date",
   SELECT = "select",
-  MULTI_SELECT = "multi_select",
-  COMBO_BOX = "combo_box",
+  DATE = "date",
   CHECKBOX = "checkbox",
   RADIO = "radio",
+  PASSWORD = "password",
   SWITCH = "switch",
   TEXTAREA = "textarea",
-  EDITOR = "editor",
-  IMAGE = "image",
-  IMAGE_GALLERY = "image_gallery",
-  FILE = "file",
-  FILES = "files",
-  EMPTY = "empty",
   CUSTOM = "custom",
+  EMPTY = "empty",
 }
 
 export interface Field<T = any> {
@@ -78,6 +71,7 @@ export interface Field<T = any> {
 
 export interface BaseFieldProps {
   disabled?: boolean;
+  autoFocus?: boolean;
 }
 
 export interface TextFieldProps extends BaseFieldProps {
@@ -126,19 +120,6 @@ export interface SelectFieldProps extends BaseFieldProps {
   nullable?: boolean;
 }
 
-export interface MultiSelectFieldProps extends BaseFieldProps {
-  value?: string[];
-  onValueChange?: (value: string[]) => void;
-  options?: SelectOption[];
-  hidePlaceholderWhenSelected?: boolean;
-}
-
-export interface ComboBoxFieldProps extends BaseFieldProps {
-  value?: string[];
-  onValueChange?: (value: string[]) => void;
-  options?: SelectOption[];
-}
-
 export interface RadioFieldProps extends BaseFieldProps {
   value?: string;
   onValueChange?: (value: string) => void;
@@ -165,66 +146,6 @@ export interface TextareaFieldProps extends BaseFieldProps {
   rows?: number;
   resizable?: boolean;
   maxLength?: number;
-}
-
-export interface EditorFieldProps extends BaseFieldProps {
-  value?: string;
-  onChange?: (e: string) => void;
-  maxLength?: number;
-}
-
-export interface ImageFieldProps extends BaseFieldProps {
-  image?: File | string | null;
-  accept?: string;
-  progress?: number;
-  placeholder?: string;
-  fallback?: string;
-  fallbackClassName?: string;
-  onFileChange?: (e: File) => void;
-  onUpload?: (file: File, onProgress: (percent: number) => void) => void;
-}
-
-export interface SingleFileFieldProps extends BaseFieldProps {
-  file?: File | null;
-  accept?: string;
-  progress?: number;
-  onFileChange?: (e: File) => void;
-  onUpload?: (file: File, onProgress: (percent: number) => void) => void;
-}
-
-export interface MultipleFilesFieldProps extends BaseFieldProps {
-  files?: ManipulatedFile[];
-  accept?: string;
-  progress?: Record<string, number>;
-  onFilesChange?: (e: ManipulatedFile[]) => void;
-  onUpload?: (
-    files: File[],
-    options: {
-      onProgress: (file: File, progress: number) => void;
-      onSuccess: (file: File) => void;
-      onError: (file: File, error: Error) => void;
-    },
-  ) => Promise<void> | void;
-  onFileOpen?: (file: ManipulatedFile) => void;
-  onFileDownload?: (file: ManipulatedFile) => void;
-}
-
-export interface ImageGalleryFieldProps extends BaseFieldProps {
-  images: ManipulatedFile[];
-  onFilesChange?: (e: ManipulatedFile[]) => void;
-  onUpload?: (
-    file: ManipulatedFile,
-    onProgress: (percent: number) => void,
-  ) => void;
-}
-
-export interface ManipulatedFile {
-  id: string;
-  file?: File | null;
-  url?: string;
-  name: string;
-  progress: number;
-  serverId: string | number;
 }
 
 export interface CustomFieldProps extends BaseFieldProps {
