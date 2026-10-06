@@ -4,7 +4,7 @@
 [![Payload CMS](https://img.shields.io/badge/Payload%20CMS-3.90-black?style=flat&logo=payloadcms)](https://payloadcms.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=flat&logo=tailwindcss)](https://tailwindcss.com/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ed?style=flat&logo=docker)](https://www.docker.com/)
+[![Docker Hub](https://img.shields.io/badge/Docker_Hub-Image-2496ed?style=flat&logo=docker)](https://hub.docker.com/repository/docker/softsurgery/web-visualizer/general)
 
 A modern, responsive multi-URL dashboard and website visualizer built with **Next.js**, **TypeScript**, **Tailwind CSS v4**, and **Payload CMS**.
 
@@ -151,6 +151,8 @@ flowchart TD
 ---
 
 ## 🐳 Docker & Docker Compose Deployment
+
+The official Docker image is available on [Docker Hub](https://hub.docker.com/repository/docker/softsurgery/web-visualizer/general).
 
 The repository includes a production-grade multi-stage `Dockerfile` (leveraging Alpine Linux and Next.js standalone output for minimal image size) and a full-stack `docker-compose.yml`.
 
