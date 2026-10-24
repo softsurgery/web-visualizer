@@ -906,10 +906,10 @@
   resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.12.tgz"
   integrity sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==
 
-"@fontsource-variable/geist@^5.3.0":
+"@fontsource-variable/montserrat@^5.3.0":
   version "5.3.0"
-  resolved "https://registry.npmjs.org/@fontsource-variable/geist/-/geist-5.3.0.tgz"
-  integrity sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/montserrat/-/montserrat-5.3.0.tgz#4e01a00a990f8d63c1903269117f3c31d8fed10b"
+  integrity sha512-7PaZoxaxrWLAyrhO46v65An9LhUhfkTExWLhfbywYZCnZEgg/W1rEHnlNmZKjNZ3nJTVYyicqxlJt10z/26yTA==
 
 "@hono/node-server@^1.19.9 || ^2.0.5":
   version "2.1.1"
