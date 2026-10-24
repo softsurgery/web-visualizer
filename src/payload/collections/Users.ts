@@ -7,4 +7,6 @@ export const Users: CollectionConfig = {
   },
   auth: true,
   fields: [],
+  versions: false,
+  authorship: false,
 }
