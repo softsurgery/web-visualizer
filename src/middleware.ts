@@ -10,10 +10,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname === "/admin" || pathname === "/admin/") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 
