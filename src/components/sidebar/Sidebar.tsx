@@ -23,6 +23,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { useVisualizer } from "@/hooks/useVisualizer";
+import { loginRedirectPath } from "@/lib/auth-routes";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -154,7 +155,7 @@ export function Sidebar({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href="/admin/login">
+                <Link href={loginRedirectPath("/")}>
                   <LogIn className="size-4" />
                   <span>Sign In</span>
                 </Link>

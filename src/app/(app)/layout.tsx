@@ -14,13 +14,24 @@ export const metadata: Metadata = {
   },
 };
 
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { ClientLayout } from "./ClientLayout";
+import { getPayloadUser, loginRedirectPath } from "@/lib/payload-auth";
+import { isPublicAppPath } from "@/lib/auth-routes";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getPayloadUser();
+  const pathname = (await headers()).get("x-pathname") ?? "/";
+
+  if (!user && !isPublicAppPath(pathname) && pathname !== "/") {
+    redirect(loginRedirectPath(pathname));
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -33,7 +44,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ClientLayout>{children}</ClientLayout>
+          <ClientLayout isAuthenticated={Boolean(user)}>
+            {children}
+          </ClientLayout>
         </ThemeProvider>
       </body>
     </html>

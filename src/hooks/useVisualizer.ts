@@ -292,8 +292,8 @@ export function useVisualizer() {
   const store = useVisualizerStore();
 
   React.useEffect(() => {
-    store.initialize();
-  }, [store.initialize]);
+    void useVisualizerStore.getState().initialize();
+  }, []);
 
   const activeGroup = store.groups.find((g) => g.id === store.activeGroupId);
 
