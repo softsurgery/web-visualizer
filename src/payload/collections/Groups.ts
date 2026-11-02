@@ -124,4 +124,6 @@ export const Groups: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
+  authorship: false,
 }

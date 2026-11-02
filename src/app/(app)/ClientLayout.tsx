@@ -1,6 +1,8 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import React from "react";
+import { useRouter } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useFooter } from "@/contexts/FooterContext";
 import { useIntro } from "@/contexts/IntroContext";
@@ -13,13 +15,25 @@ import { Header } from "@/components/layout/Header";
 import { usePathname } from "next/navigation";
 import { useVisualizer } from "@/hooks/useVisualizer";
 import { Spinner } from "@/components/shared/Spinner";
+import { isPublicAppPath, loginRedirectPath } from "@/lib/auth-routes";
 
 interface LayoutProps {
   className?: string;
   children?: ReactNode;
+  isAuthenticated: boolean;
 }
 
-function LayoutShell({ className, children }: LayoutProps) {
+function RedirectToLogin({ returnTo }: { returnTo: string }) {
+  const router = useRouter();
+
+  React.useEffect(() => {
+    router.replace(loginRedirectPath(returnTo));
+  }, [router, returnTo]);
+
+  return null;
+}
+
+function LayoutShell({ className, children, isAuthenticated }: LayoutProps) {
   const { title, description, floating } = useIntro();
   const { content } = useFooter();
   const { enableMainOverflow, showSidebar = true } = useUI();
@@ -31,6 +45,23 @@ function LayoutShell({ className, children }: LayoutProps) {
     visualizer.isShared ||
     (typeof window !== "undefined" &&
       new URLSearchParams(window.location.search).get("shared") === "true");
+
+  const isProtectedRoute = !isPublicAppPath(pathname);
+
+  if (isProtectedRoute && !isAuthenticated) {
+    return (
+      <>
+        <RedirectToLogin returnTo={pathname ?? "/"} />
+        <div className="flex h-svh w-full items-center justify-center bg-background">
+          <Spinner size="large" />
+        </div>
+        {/* Keep route children mounted so server redirects (e.g. home → login/share) can run */}
+        <div className="hidden" aria-hidden>
+          {children}
+        </div>
+      </>
+    );
+  }
 
   if (!visualizer.isInitialized) {
     return (
@@ -101,10 +132,16 @@ function LayoutShell({ className, children }: LayoutProps) {
   );
 }
 
-export function ClientLayout({ children }: { children: ReactNode }) {
+export function ClientLayout({
+  children,
+  isAuthenticated,
+}: {
+  children: ReactNode;
+  isAuthenticated: boolean;
+}) {
   return (
     <AppProviders>
-      <LayoutShell>{children}</LayoutShell>
+      <LayoutShell isAuthenticated={isAuthenticated}>{children}</LayoutShell>
     </AppProviders>
   );
 }

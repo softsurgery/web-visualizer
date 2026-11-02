@@ -206,7 +206,7 @@ export function IframeCard({
           )}
         </div>
       <div
-        className="flex-1 relative bg-muted/20 overflow-y-auto overflow-x-hidden no-scrollbar"
+        className="flex-1 relative bg-muted/20 overflow-hidden"
         ref={containerRef}
       >
         {!isPending && (

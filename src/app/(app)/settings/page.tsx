@@ -1,16 +1,14 @@
-import { headers as getHeaders } from "next/headers";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
 import { redirect } from "next/navigation";
 import { SettingsView } from "@/components/settings/SettingsView";
+import { getPayloadUser, loginRedirectPath } from "@/lib/payload-auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const payload = await getPayload({ config: configPromise });
-  const headers = await getHeaders();
-  const { user } = await payload.auth({ headers });
+  const user = await getPayloadUser();
 
   if (!user) {
-    redirect("/admin/login");
+    redirect(loginRedirectPath("/settings"));
   }
 
   return <SettingsView />;

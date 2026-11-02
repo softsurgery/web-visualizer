@@ -24,6 +24,7 @@ import { ChevronsUpDownIcon, BadgeCheckIcon, BellIcon, LogOutIcon, Settings } fr
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { users } from "@/api/users"
+import { loginRedirectPath } from "@/lib/auth-routes"
 
 export function NavUser({
   user,
@@ -40,10 +41,10 @@ export function NavUser({
   const handleSignOut = async () => {
     try {
       await users.logout()
-      router.push('/admin/login')
+      router.push(loginRedirectPath("/"))
     } catch (error) {
       console.error('Logout failed:', error)
-      router.push('/admin/login')
+      router.push(loginRedirectPath("/"))
     }
   }
 
